@@ -1,0 +1,87 @@
+/* ═══════════════════════════════════════
+   QUESTLIFE — ANIMATIONS
+   ═══════════════════════════════════════ */
+
+/* Confetti */
+.confetti-piece {
+  position: fixed;
+  pointer-events: none;
+  z-index: 500;
+  border-radius: 2px;
+  animation: confettiFall var(--dur, 1.5s) ease-out forwards;
+}
+@keyframes confettiFall {
+  0%   { opacity: 1; transform: translateY(0) rotate(0deg) scale(1); }
+  80%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(var(--ty, 200px)) translateX(var(--tx, 0px)) rotate(var(--rot, 720deg)) scale(0.2); }
+}
+
+/* Orb glow pulse */
+.orb {
+  position: fixed;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(60px);
+  animation: orbFloat var(--dur, 8s) ease-in-out infinite alternate;
+}
+@keyframes orbFloat {
+  from { transform: translateY(0) scale(1); opacity: var(--opA, 0.04); }
+  to   { transform: translateY(-30px) scale(1.1); opacity: var(--opB, 0.08); }
+}
+
+/* Skill point flash */
+.skill-flash {
+  animation: skillFlash 0.5s ease;
+}
+@keyframes skillFlash {
+  0%  { transform: scale(1); }
+  30% { transform: scale(1.4); filter: brightness(2); }
+  100%{ transform: scale(1); filter: brightness(1); }
+}
+
+/* Quest complete tick */
+@keyframes tickIn {
+  0%  { transform: scale(0) rotate(-45deg); }
+  60% { transform: scale(1.3) rotate(5deg); }
+  100%{ transform: scale(1) rotate(0deg); }
+}
+.tick-animate { animation: tickIn 0.4s cubic-bezier(0.4,0,0.2,1) forwards; }
+
+/* Boss shake on hit */
+@keyframes bossHit {
+  0%,100%{ transform: translateX(0); }
+  20%    { transform: translateX(-6px); }
+  40%    { transform: translateX(6px); }
+  60%    { transform: translateX(-4px); }
+  80%    { transform: translateX(4px); }
+}
+.boss-hit { animation: bossHit 0.4s ease; }
+
+/* Ring fill pulse */
+@keyframes ringPulse {
+  0%,100%{ filter: brightness(1); }
+  50%    { filter: brightness(1.8) drop-shadow(0 0 6px var(--gold)); }
+}
+.ring-pulse { animation: ringPulse 0.5s ease; }
+
+/* Achievement unlock */
+@keyframes achUnlock {
+  0%  { transform: scale(0.6) rotate(-10deg); opacity: 0; }
+  60% { transform: scale(1.1) rotate(3deg); opacity: 1; }
+  100%{ transform: scale(1) rotate(0); opacity: 1; }
+}
+.ach-unlock-anim { animation: achUnlock 0.5s cubic-bezier(0.4,0,0.2,1); }
+
+/* Ripple on quest tap */
+.ripple {
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(240,192,64,0.25);
+  transform: scale(0);
+  animation: rippleAnim 0.6s ease-out;
+  pointer-events: none;
+}
+@keyframes rippleAnim {
+  to { transform: scale(4); opacity: 0; }
+}

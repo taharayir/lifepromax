@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0b0f">
+<title>QuestLife ⚔️</title>
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/animations.css">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- PARTICLE CANVAS -->
+<canvas id="particleCanvas"></canvas>
+
+<!-- TOPBAR -->
+<div class="topbar" id="topbar">
+  <div class="topbar-title">
+    <span class="title-quest">QUEST</span><span class="title-life">LIFE</span>
+  </div>
+  <div class="topbar-right">
+    <div class="topbar-streak" id="topStreak">🔥 0</div>
+    <div class="topbar-level" id="topLevel">
+      <span>LVL</span><strong id="topLvl">1</strong>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<main>
+
+  <!-- ═══════ DASHBOARD ═══════ -->
+  <div class="page active" id="page-dashboard">
+
+    <div class="player-card" id="playerCard">
+      <div class="card-glow"></div>
+      <div class="player-header">
+        <div class="avatar-wrap" id="avatarWrap" onclick="openClassModal()">
+          <div class="avatar-ring"></div>
+          <div class="avatar-emoji" id="avatarEmoji">⚔️</div>
+          <div class="avatar-level" id="avatarLevel">1</div>
+        </div>
+        <div class="player-info">
+          <div class="player-name" id="playerName">Hero</div>
+          <div class="player-class" id="playerClass">
+            <span class="class-badge none">انتخاب کلاس ←</span>
+          </div>
+          <div class="player-title" id="playerTitle">تازه‌کار</div>
+        </div>
+        <div class="player-gold">
+          <div class="gold-icon">🪙</div>
+          <div class="gold-val" id="goldVal">0</div>
+        </div>
+      </div>
+
+      <div class="bars-section">
+        <div class="bar-row">
+          <div class="bar-label">
+            <span>❤️ HP</span>
+            <span id="hpText">100/100</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill hp-bar" id="hpBar" style="width:100%">
+              <div class="bar-shine"></div>
+            </div>
+          </div>
+        </div>
+        <div class="bar-row">
+          <div class="bar-label">
+            <span>⭐ XP</span>
+            <span id="xpText">0/100</span>
+          </div>
+          <div class="bar-track">
+            <div class="bar-fill xp-bar" id="xpBar" style="width:0%">
+              <div class="bar-shine"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- STATS -->
+    <div class="section-header">
+      <div class="section-title">مهارت‌ها</div>
+      <div class="section-sub" id="totalPower">Power: 0</div>
+    </div>
+    <div class="skills-grid" id="skillsGrid">
+      <div class="skill-card str" onclick="showStatInfo('str')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">⚔️</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-str" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-str">0</div>
+        <div class="skill-name">STR</div>
+      </div>
+      <div class="skill-card int" onclick="showStatInfo('int')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">📚</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-int" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-int">0</div>
+        <div class="skill-name">INT</div>
+      </div>
+      <div class="skill-card wis" onclick="showStatInfo('wis')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">🔮</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-wis" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-wis">0</div>
+        <div class="skill-name">WIS</div>
+      </div>
+      <div class="skill-card com" onclick="showStatInfo('com')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">🗣️</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-com" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-com">0</div>
+        <div class="skill-name">COM</div>
+      </div>
+      <div class="skill-card eng" onclick="showStatInfo('eng')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">⚙️</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-eng" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-eng">0</div>
+        <div class="skill-name">ENG</div>
+      </div>
+      <div class="skill-card vit" onclick="showStatInfo('vit')">
+        <div class="skill-glow"></div>
+        <div class="skill-icon">❤️</div>
+        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-vit" style="width:0%"></div></div>
+        <div class="skill-val" id="stat-vit">0</div>
+        <div class="skill-name">VIT</div>
+      </div>
+    </div>
+
+    <!-- BOSS -->
+    <div class="section-header">
+      <div class="section-title">Boss</div>
+      <div class="section-sub" id="bossSubtitle">باس فعلی</div>
+    </div>
+    <div class="boss-card" id="bossCard">
+      <div class="boss-bg-effect"></div>
+      <div class="boss-left">
+        <div class="boss-avatar" id="bossAvatar">👾</div>
+        <div class="boss-health-ring">
+          <svg viewBox="0 0 60 60">
+            <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
+            <circle cx="30" cy="30" r="26" fill="none" stroke="#e85d5d" stroke-width="4"
+              stroke-dasharray="163" id="bossRingFill" stroke-dashoffset="0"
+              stroke-linecap="round" transform="rotate(-90 30 30)"/>
+          </svg>
+        </div>
+      </div>
+      <div class="boss-right">
+        <div class="boss-name" id="bossName">Procrastination</div>
+        <div class="boss-hp-bar-wrap">
+          <div class="boss-hp-track">
+            <div class="bar-fill boss-bar" id="bossHpBar" style="width:100%">
+              <div class="bar-shine"></div>
+            </div>
+          </div>
+          <div class="boss-hp-text" id="bossHpText">500 / 500</div>
+        </div>
+        <div class="boss-damage-preview" id="bossDmgPreview">هر مأموریت = ضربه 💥</div>
+      </div>
+    </div>
+
+    <!-- DAILY CHALLENGE -->
+    <div class="section-header">
+      <div class="section-title">Daily Challenge</div>
+      <div class="section-sub" id="challengeTimer">--:--:--</div>
+    </div>
+    <div class="challenge-card" id="challengeCard">
+      <div class="challenge-icon" id="challengeIcon">🎯</div>
+      <div class="challenge-info">
+        <div class="challenge-name" id="challengeName">در حال بارگذاری...</div>
+        <div class="challenge-reward" id="challengeReward">جایزه: --</div>
+      </div>
+      <button class="challenge-btn" id="challengeBtn" onclick="completeChallenge()">انجام</button>
+    </div>
+
+    <!-- ACHIEVEMENTS PREVIEW -->
+    <div class="section-header">
+      <div class="section-title">دستاوردها</div>
+      <div class="section-sub" id="achCount">0/0</div>
+    </div>
+    <div class="ach-scroll" id="achScroll"></div>
+
+  </div>
+
+  <!-- ═══════ QUESTS ═══════ -->
+  <div class="page" id="page-quests">
+
+    <div class="quest-header">
+      <div class="quest-date" id="questDate"></div>
+      <div class="quest-progress-ring">
+        <svg viewBox="0 0 48 48">
+          <circle cx="24" cy="24" r="20" fill="none" stroke="var(--border)" stroke-width="4"/>
+          <circle cx="24" cy="24" r="20" fill="none" stroke="var(--gold)" stroke-width="4"
+            stroke-dasharray="125.6" id="questRing" stroke-dashoffset="125.6"
+            stroke-linecap="round" transform="rotate(-90 24 24)"/>
+        </svg>
+        <span id="questRingText">0%</span>
+      </div>
+    </div>
+
+    <div class="section-title" style="margin-bottom:12px">مأموریت‌های روزانه</div>
+    <div class="quest-list" id="questList"></div>
+    <button class="add-quest-btn" onclick="openQuestModal()">
+      <span>+</span> مأموریت سفارشی
+    </button>
+
+    <div class="divider"></div>
+
+    <div class="section-title" style="margin-bottom:12px">مأموریت‌های پیش‌فرض</div>
+    <div class="quest-list" id="defaultQuestList"></div>
+
+  </div>
+
+  <!-- ═══════ SKILL TREE ═══════ -->
+  <div class="page" id="page-skilltree">
+
+    <div class="section-title" style="margin-bottom:16px">درخت مهارت</div>
+    <div class="tree-tabs" id="treeTabs">
+      <button class="tree-tab active" onclick="switchTree('str',this)">⚔️ STR</button>
+      <button class="tree-tab" onclick="switchTree('int',this)">📚 INT</button>
+      <button class="tree-tab" onclick="switchTree('wis',this)">🔮 WIS</button>
+      <button class="tree-tab" onclick="switchTree('eng',this)">⚙️ ENG</button>
+    </div>
+    <div class="skill-tree-wrap" id="skillTreeWrap"></div>
+
+  </div>
+
+  <!-- ═══════ MAP ═══════ -->
+  <div class="page" id="page-map">
+
+    <div class="section-title" style="margin-bottom:16px">نقشه جهان</div>
+    <div class="world-map-wrap">
+      <div class="map-path" id="mapPath"></div>
+    </div>
+
+  </div>
+
+  <!-- ═══════ SHOP ═══════ -->
+  <div class="page" id="page-shop">
+
+    <div class="shop-header">
+      <div class="shop-title-row">
+        <div class="section-title">فروشگاه</div>
+        <div class="shop-gold-badge">🪙 <span id="shopGold">0</span></div>
+      </div>
+      <div class="shop-tabs">
+        <button class="shop-tab active" onclick="switchShopTab('items',this)">آیتم‌ها</button>
+        <button class="shop-tab" onclick="switchShopTab('boosts',this)">Boost</button>
+      </div>
+    </div>
+    <div class="shop-grid" id="shopGrid"></div>
+
+  </div>
+
+  <!-- ═══════ PROFILE ═══════ -->
+  <div class="page" id="page-profile">
+
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profileAvatar">⚔️</div>
+      <div class="profile-name-wrap">
+        <input class="profile-name-input" id="nameInput" placeholder="نام شخصیت..." />
+        <button class="profile-save-btn" onclick="saveName()">✓</button>
+      </div>
+      <div class="profile-class-label" id="profileClassLabel">بدون کلاس</div>
+    </div>
+
+    <div class="stats-full-grid" id="statsFullGrid"></div>
+
+    <div class="section-title" style="margin:20px 0 12px">تاریخچه فعالیت</div>
+    <div class="activity-chart" id="activityChart"></div>
+
+    <div class="divider"></div>
+    <button class="reset-btn" onclick="confirmReset()">⚠️ ریست کامل</button>
+
+  </div>
+
+</main>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nav-item active" onclick="goPage('dashboard',this)" data-page="dashboard">
+    <div class="nav-icon-wrap"><span class="nav-icon">🏰</span></div>
+    <span class="nav-label">خانه</span>
+  </button>
+  <button class="nav-item" onclick="goPage('quests',this)" data-page="quests">
+    <div class="nav-icon-wrap"><span class="nav-icon">⚔️</span></div>
+    <span class="nav-label">مأموریت</span>
+  </button>
+  <button class="nav-item" onclick="goPage('skilltree',this)" data-page="skilltree">
+    <div class="nav-icon-wrap"><span class="nav-icon">🌳</span></div>
+    <span class="nav-label">مهارت</span>
+  </button>
+  <button class="nav-item" onclick="goPage('map',this)" data-page="map">
+    <div class="nav-icon-wrap"><span class="nav-icon">🗺️</span></div>
+    <span class="nav-label">نقشه</span>
+  </button>
+  <button class="nav-item" onclick="goPage('shop',this)" data-page="shop">
+    <div class="nav-icon-wrap"><span class="nav-icon">🛒</span></div>
+    <span class="nav-label">فروشگاه</span>
+  </button>
+  <button class="nav-item" onclick="goPage('profile',this)" data-page="profile">
+    <div class="nav-icon-wrap"><span class="nav-icon">👤</span></div>
+    <span class="nav-label">پروفایل</span>
+  </button>
+</nav>
+
+<!-- ═══════ MODALS ═══════ -->
+
+<!-- CLASS MODAL -->
+<div class="modal-overlay" id="classModal" onclick="closeModal('classModal')">
+  <div class="modal-box" onclick="e=>e.stopPropagation()">
+    <div class="modal-title">⚜️ انتخاب کلاس</div>
+    <div class="modal-sub">وقتی Level 10 بشی می‌تونی تغییرش بدی</div>
+    <div class="class-grid">
+      <div class="class-opt warrior" onclick="selectClass('warrior')">
+        <div class="class-opt-glow"></div>
+        <div class="class-icon">⚔️</div>
+        <div class="class-name">Warrior</div>
+        <div class="class-bonus">+20% XP ورزش</div>
+      </div>
+      <div class="class-opt scholar" onclick="selectClass('scholar')">
+        <div class="class-opt-glow"></div>
+        <div class="class-icon">📚</div>
+        <div class="class-name">Scholar</div>
+        <div class="class-bonus">+20% XP مطالعه</div>
+      </div>
+      <div class="class-opt monk" onclick="selectClass('monk')">
+        <div class="class-opt-glow"></div>
+        <div class="class-icon">🔮</div>
+        <div class="class-name">Monk</div>
+        <div class="class-bonus">+20% XP مدیتیشن</div>
+      </div>
+      <div class="class-opt engineer" onclick="selectClass('engineer')">
+        <div class="class-opt-glow"></div>
+        <div class="class-icon">⚙️</div>
+        <div class="class-name">Engineer</div>
+        <div class="class-bonus">+20% XP کدنویسی</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QUEST MODAL -->
+<div class="modal-overlay" id="questModal" onclick="closeModal('questModal')">
+  <div class="modal-box bottom-sheet" onclick="e=>e.stopPropagation()">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ مأموریت جدید</div>
+    <div class="form-group">
+      <label class="form-label">عنوان</label>
+      <input class="form-input" id="qTitle" placeholder="مثلاً: ورزش ۳۰ دقیقه" />
+    </div>
+    <div class="form-row">
+      <div class="form-group">
+        <label class="form-label">مهارت</label>
+        <select class="form-input" id="qStat">
+          <option value="str">⚔️ Strength</option>
+          <option value="int">📚 Intelligence</option>
+          <option value="wis">🔮 Wisdom</option>
+          <option value="com">🗣️ Communication</option>
+          <option value="eng">⚙️ Engineering</option>
+          <option value="vit">❤️ Vitality</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">XP</label>
+        <input class="form-input" type="number" id="qXp" value="20" min="5" max="100" />
+      </div>
+      <div class="form-group">
+        <label class="form-label">Gold</label>
+        <input class="form-input" type="number" id="qGold" value="10" min="5" max="50" />
+      </div>
+    </div>
+    <div class="modal-btns">
+      <button class="btn-cancel" onclick="closeModal('questModal')">لغو</button>
+      <button class="btn-primary" onclick="addCustomQuest()">افزودن ✓</button>
+    </div>
+  </div>
+</div>
+
+<!-- STAT INFO MODAL -->
+<div class="modal-overlay" id="statModal" onclick="closeModal('statModal')">
+  <div class="modal-box" onclick="e=>e.stopPropagation()">
+    <div class="stat-modal-content" id="statModalContent"></div>
+  </div>
+</div>
+
+<!-- LEVEL UP MODAL -->
+<div class="modal-overlay" id="levelUpModal">
+  <div class="modal-box levelup-box">
+    <div class="levelup-rays"></div>
+    <div class="levelup-icon">⬆️</div>
+    <div class="levelup-title">LEVEL UP!</div>
+    <div class="levelup-level" id="levelUpNum">2</div>
+    <div class="levelup-sub" id="levelUpSub">تبریک! قدرت بیشتری داری</div>
+    <button class="btn-primary" onclick="closeModal('levelUpModal')" style="width:100%;margin-top:16px">ادامه ⚔️</button>
+  </div>
+</div>
+
+<!-- BOSS DEFEAT MODAL -->
+<div class="modal-overlay" id="bossModal">
+  <div class="modal-box boss-defeat-box">
+    <div class="boss-defeat-icon" id="bossDefeatedIcon">💀</div>
+    <div class="boss-defeat-title">BOSS DEFEATED!</div>
+    <div class="boss-defeat-name" id="bossDefeatedName">Procrastination</div>
+    <div class="boss-defeat-reward" id="bossDefeatedReward">+100 Gold</div>
+    <button class="btn-primary" onclick="closeModal('bossModal')" style="width:100%;margin-top:16px">🎉 گرفتم!</button>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- XP FLOAT -->
+<div class="xp-float-container" id="xpFloats"></div>
+
+<script src="js/data.js"></script>
+<script src="js/engine.js"></script>
+<script src="js/render.js"></script>
+<script src="js/particles.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
