@@ -69,13 +69,3 @@ questlife/
 همه داده‌ها در `localStorage` مرورگر ذخیره میشن — بدون نیاز به سرور یا اینترنت.
 
 ---
-
-## 🛠️ ساخته شده با
-
-- HTML5 / CSS3 / Vanilla JavaScript
-- Google Fonts (Cinzel + Vazirmatn)
-- Canvas API (particles)
-
----
-
-*ساخته شده با ❤️ و Claude AI*
