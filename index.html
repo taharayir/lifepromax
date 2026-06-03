@@ -1,379 +1,659 @@
+cat > /mnt/user-data/outputs/questlife-v2.html << 'HTMLEOF'
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0b0f">
+<meta name="theme-color" content="#06070d">
 <title>QuestLife ⚔️</title>
-<link rel="stylesheet" href="css/style.css">
-<link rel="stylesheet" href="css/animations.css">
 <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;900&family=Vazirmatn:wght@300;400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+--bg:#06070d;--bg2:#0c0e18;--bg3:#131628;--card:#181b28;--card2:#1e2235;--border:#252840;--border2:#2e3350;
+--gold:#f0c040;--gold2:#ffe57a;--gold3:rgba(240,192,64,.1);
+--red:#e85d5d;--green:#4caf7d;--blue:#5b8dee;--purple:#9b6dff;--cyan:#3dd9c5;--orange:#ff8c42;--pink:#ff6b9d;
+--common:#9fa3b8;--rare:#5b8dee;--epic:#9b6dff;--legendary:#f0c040;--mythic:#ff6b9d;
+--text:#eaedf8;--text2:#8b90aa;--text3:#454860;
+--shadow:0 16px 48px rgba(0,0,0,.8);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Vazirmatn',sans-serif;min-height:100dvh;overflow-x:hidden;padding-bottom:80px}
+#bgCanvas{position:fixed;inset:0;pointer-events:none;z-index:0;opacity:.5}
+
+/* TOPBAR */
+.topbar{position:sticky;top:0;z-index:100;display:flex;align-items:center;justify-content:space-between;padding:12px 16px;background:rgba(6,7,13,.9);backdrop-filter:blur(24px);border-bottom:1px solid var(--border)}
+.topbar-title{font-family:'Cinzel',serif;font-size:18px;font-weight:900;letter-spacing:3px}
+.title-q{background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.title-l{color:var(--text3)}
+.topbar-r{display:flex;align-items:center;gap:8px}
+.top-badge{display:flex;align-items:center;gap:4px;background:var(--card);border:1px solid var(--border2);border-radius:20px;padding:4px 10px;font-size:12px}
+.top-badge.streak{color:var(--orange);border-color:rgba(255,140,66,.25)}
+.top-badge.level{color:var(--gold);font-family:'Cinzel',serif;border-color:rgba(240,192,64,.25)}
+.top-badge.gold{color:var(--gold)}
+
+/* MAIN */
+main{position:relative;z-index:1;padding:14px;max-width:480px;margin:0 auto}
+
+/* PAGES */
+.page{display:none;animation:pgIn .3s ease}
+.page.active{display:block}
+@keyframes pgIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* SECTION HEADER */
+.sh{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.st{font-family:'Cinzel',serif;font-size:12px;font-weight:600;letter-spacing:2px;color:var(--text2);text-transform:uppercase}
+.ss{font-size:11px;color:var(--text3)}
+
+/* CARDS */
+.card{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:16px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.card-glow{position:absolute;top:-50px;right:-50px;width:150px;height:150px;background:radial-gradient(circle,rgba(240,192,64,.07),transparent);pointer-events:none}
+
+/* PLAYER CARD */
+.player-card{background:linear-gradient(135deg,var(--card),#101320);border:1px solid var(--border2);border-radius:22px;padding:18px;margin-bottom:14px;position:relative;overflow:hidden;box-shadow:var(--shadow)}
+.pc-top{display:flex;align-items:center;gap:14px;margin-bottom:16px}
+
+/* AVATAR - CSS 2.5D */
+.avatar-3d{position:relative;width:72px;height:88px;flex-shrink:0;cursor:pointer}
+.char-body{position:relative;width:72px;height:88px}
+.char-part{position:absolute;display:flex;align-items:center;justify-content:center;border-radius:50%;font-size:0;transition:all .3s}
+.char-head{width:44px;height:44px;left:14px;top:0;background:radial-gradient(135deg,#f5c5a3,#e8a87c);border:2px solid rgba(240,192,64,.3);border-radius:50%;font-size:22px;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.char-body-part{width:40px;height:28px;left:16px;top:42px;border-radius:8px;font-size:18px;background:var(--card2);border:1px solid var(--border2);box-shadow:0 4px 8px rgba(0,0,0,.3)}
+.char-weapon{position:absolute;right:-8px;top:28px;font-size:20px;transform:rotate(15deg);filter:drop-shadow(0 2px 6px rgba(240,192,64,.4))}
+.char-pet{position:absolute;left:-10px;bottom:0;font-size:18px;animation:petBob 2s ease-in-out infinite}
+.char-aura{position:absolute;inset:-6px;border-radius:50%;border:2px solid transparent;animation:auraSpin 3s linear infinite}
+@keyframes petBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}
+@keyframes auraSpin{to{transform:rotate(360deg)}}
+.avatar-lv{position:absolute;bottom:-4px;right:-4px;background:var(--gold);color:#06070d;font-size:9px;font-weight:800;border-radius:10px;padding:1px 5px;font-family:'Cinzel',serif;border:2px solid var(--bg);z-index:2}
+
+.pc-info{flex:1}
+.pc-name{font-size:17px;font-weight:700;margin-bottom:2px}
+.pc-class-badge{display:inline-flex;align-items:center;gap:4px;font-size:10px;border-radius:10px;padding:2px 8px;border:1px solid;font-family:'Cinzel',serif;letter-spacing:.5px;cursor:pointer;margin-bottom:4px}
+.pc-title{font-size:10px;color:var(--text3)}
+.pc-gold-row{display:flex;align-items:center;gap:4px;font-size:13px;font-weight:700;color:var(--gold)}
+
+/* BARS */
+.bar-row{margin-bottom:7px}
+.bar-lbl{display:flex;justify-content:space-between;font-size:10px;color:var(--text2);margin-bottom:3px}
+.bar-track{height:9px;background:var(--bg3);border-radius:5px;overflow:hidden;border:1px solid var(--border)}
+.bar-fill{height:100%;border-radius:5px;position:relative;overflow:hidden;transition:width .7s cubic-bezier(.4,0,.2,1)}
+.bar-fill::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:sh 2.5s infinite}
+@keyframes sh{to{left:200%}}
+.hp-bar{background:linear-gradient(90deg,#b71c1c,var(--red),#ff6b6b)}
+.xp-bar{background:linear-gradient(90deg,var(--blue),var(--purple))}
+.mana-bar{background:linear-gradient(90deg,#1a237e,var(--blue))}
+
+/* STATS GRID */
+.stats-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:14px}
+.stat-c{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:10px 6px;text-align:center;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.stat-c:hover{transform:translateY(-2px)}
+.stat-c:active{transform:scale(.96)}
+.stat-c .sg{position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:13px}
+.stat-c:hover .sg{opacity:1}
+.stat-c.s-str{border-color:rgba(232,93,93,.2)}.stat-c.s-str:hover{border-color:rgba(232,93,93,.5)}.stat-c.s-str .sg{background:radial-gradient(circle at 50% 0%,rgba(232,93,93,.1),transparent)}.stat-c.s-str .sv{color:var(--red)}
+.stat-c.s-int{border-color:rgba(91,141,238,.2)}.stat-c.s-int:hover{border-color:rgba(91,141,238,.5)}.stat-c.s-int .sg{background:radial-gradient(circle at 50% 0%,rgba(91,141,238,.1),transparent)}.stat-c.s-int .sv{color:var(--blue)}
+.stat-c.s-wis{border-color:rgba(155,109,255,.2)}.stat-c.s-wis:hover{border-color:rgba(155,109,255,.5)}.stat-c.s-wis .sg{background:radial-gradient(circle at 50% 0%,rgba(155,109,255,.1),transparent)}.stat-c.s-wis .sv{color:var(--purple)}
+.stat-c.s-com{border-color:rgba(61,217,197,.2)}.stat-c.s-com:hover{border-color:rgba(61,217,197,.5)}.stat-c.s-com .sg{background:radial-gradient(circle at 50% 0%,rgba(61,217,197,.1),transparent)}.stat-c.s-com .sv{color:var(--cyan)}
+.stat-c.s-eng{border-color:rgba(255,140,66,.2)}.stat-c.s-eng:hover{border-color:rgba(255,140,66,.5)}.stat-c.s-eng .sg{background:radial-gradient(circle at 50% 0%,rgba(255,140,66,.1),transparent)}.stat-c.s-eng .sv{color:var(--orange)}
+.stat-c.s-vit{border-color:rgba(76,175,125,.2)}.stat-c.s-vit:hover{border-color:rgba(76,175,125,.5)}.stat-c.s-vit .sg{background:radial-gradient(circle at 50% 0%,rgba(76,175,125,.1),transparent)}.stat-c.s-vit .sv{color:var(--green)}
+.si{font-size:20px;margin-bottom:4px}
+.sb-w{height:3px;background:var(--border);border-radius:2px;margin:3px 4px 5px;overflow:hidden}
+.sb-f{height:100%;border-radius:2px;background:currentColor;transition:width .8s ease}
+.sv{font-size:18px;font-weight:800;line-height:1}
+.sn{font-size:8px;color:var(--text3);margin-top:3px;letter-spacing:1px}
+
+/* BOSS */
+.boss-card{background:linear-gradient(135deg,rgba(232,93,93,.07),var(--card));border:1px solid rgba(232,93,93,.2);border-radius:20px;padding:14px;margin-bottom:14px;position:relative;overflow:hidden}
+.boss-bg{position:absolute;top:-40px;left:-40px;width:120px;height:120px;background:radial-gradient(circle,rgba(232,93,93,.1),transparent);pointer-events:none}
+.boss-row{display:flex;align-items:center;gap:12px}
+.boss-av{position:relative;flex-shrink:0}
+.boss-emoji{font-size:40px;display:block;position:relative;z-index:1}
+.boss-ring{position:absolute;inset:-8px;z-index:0}
+.boss-ring svg{width:100%;height:100%}
+.boss-info{flex:1}
+.boss-name{font-family:'Cinzel',serif;font-size:14px;font-weight:700;color:var(--red);margin-bottom:6px}
+.boss-ht{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;border:1px solid var(--border);margin-bottom:3px}
+.boss-hf{height:100%;border-radius:4px;background:linear-gradient(90deg,#7f0000,var(--red));transition:width .7s ease;position:relative;overflow:hidden}
+.boss-hf::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,.3),transparent);animation:sh 2s infinite}
+.boss-ht2{display:flex;justify-content:space-between;font-size:10px;color:var(--text3)}
+
+/* CHALLENGE */
+.ch-card{background:linear-gradient(135deg,rgba(240,192,64,.06),var(--card));border:1px solid rgba(240,192,64,.2);border-radius:18px;padding:14px;display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.ch-icon{font-size:30px;flex-shrink:0}
+.ch-info{flex:1}
+.ch-name{font-size:13px;font-weight:600;margin-bottom:3px}
+.ch-rew{font-size:10px;color:var(--gold)}
+.ch-btn{background:var(--gold);color:#06070d;border:none;border-radius:12px;padding:8px 14px;font-family:'Vazirmatn',sans-serif;font-weight:700;font-size:12px;cursor:pointer;transition:all .2s;white-space:nowrap}
+.ch-btn:hover{background:var(--gold2);transform:scale(1.05)}
+.ch-btn:disabled{opacity:.4;cursor:not-allowed;transform:none}
+
+/* ACH SCROLL */
+.ach-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:4px;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory}
+.ach-scroll::-webkit-scrollbar{display:none}
+.ach-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:10px 12px;min-width:100px;scroll-snap-align:start;text-align:center;flex-shrink:0;transition:all .2s}
+.ach-item.unlocked{border-color:rgba(240,192,64,.35);background:rgba(240,192,64,.04)}
+.ach-item.locked{opacity:.3;filter:grayscale(.8)}
+.ach-em{font-size:24px;margin-bottom:4px}
+.ach-nm{font-size:10px;font-weight:600;margin-bottom:1px}
+.ach-dc{font-size:9px;color:var(--text3)}
+
+/* QUESTS PAGE */
+.qh{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.qdate{font-size:12px;color:var(--text2)}
+.qring{position:relative;width:46px;height:46px}
+.qring svg{width:100%;height:100%}
+.qring span{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:9px;font-weight:700;color:var(--gold)}
+.qtabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.qtabs::-webkit-scrollbar{display:none}
+.qtab{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);font-family:'Vazirmatn',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
+.qtab.active{background:var(--gold);color:#06070d;border-color:var(--gold);font-weight:700}
+.quest-list{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.quest-item{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:12px 14px;display:flex;align-items:center;gap:12px;position:relative;overflow:hidden;cursor:pointer;transition:all .25s;-webkit-user-select:none;user-select:none}
+.quest-item::before{content:'';position:absolute;right:0;top:0;bottom:0;width:3px;border-radius:0 14px 14px 0;background:var(--border);transition:background .3s}
+.quest-item:not(.done):hover{border-color:rgba(240,192,64,.3)}
+.quest-item:not(.done):hover::before{background:var(--gold)}
+.quest-item:not(.done):active{transform:scale(.98)}
+.quest-item.done{opacity:.5;background:rgba(76,175,125,.04);border-color:rgba(76,175,125,.15)}
+.quest-item.done::before{background:var(--green)}
+.qcheck{width:28px;height:28px;border-radius:50%;border:2px solid var(--border2);background:var(--bg3);display:flex;align-items:center;justify-content:center;font-size:12px;flex-shrink:0;transition:all .3s}
+.quest-item.done .qcheck{background:var(--green);border-color:var(--green)}
+.qcontent{flex:1}
+.qtitle{font-size:13px;font-weight:500;margin-bottom:4px}
+.qrews{display:flex;gap:5px;flex-wrap:wrap}
+.rtag{font-size:9px;padding:2px 6px;border-radius:7px;background:rgba(255,255,255,.04);border:1px solid var(--border)}
+.rtag.rx{color:var(--blue);border-color:rgba(91,141,238,.25)}
+.rtag.rg{color:var(--gold);border-color:rgba(240,192,64,.25)}
+.rtag.rs{color:var(--purple);border-color:rgba(155,109,255,.25)}
+.rtag.rr{font-size:9px}
+.rtag.common{color:var(--common)}.rtag.rare{color:var(--rare)}.rtag.epic{color:var(--epic)}.rtag.legendary{color:var(--legendary)}.rtag.mythic{color:var(--mythic)}
+.add-q-btn{width:100%;background:rgba(240,192,64,.06);border:1px dashed rgba(240,192,64,.25);border-radius:13px;padding:12px;color:var(--gold);font-family:'Vazirmatn',sans-serif;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;transition:all .2s}
+.add-q-btn:hover{background:rgba(240,192,64,.1)}
+.divider{height:1px;background:var(--border);margin:16px 0}
+
+/* SKILL TREE */
+.tree-tabs{display:flex;gap:6px;margin-bottom:14px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.tree-tabs::-webkit-scrollbar{display:none}
+.tree-tab{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 14px;color:var(--text2);font-family:'Vazirmatn',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
+.tree-tab.active{background:var(--gold);color:#06070d;border-color:var(--gold);font-weight:700}
+.tree-node{background:var(--card);border:1px solid var(--border);border-radius:18px;padding:14px;margin-bottom:8px;transition:all .2s}
+.tree-node.unlocked{border-color:rgba(240,192,64,.3);background:rgba(240,192,64,.03)}
+.tree-node.locked{opacity:.4}
+.tn-header{display:flex;align-items:center;gap:10px}
+.tn-icon{font-size:22px}
+.tn-info{flex:1}
+.tn-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.tn-desc{font-size:10px;color:var(--cyan)}
+.tn-req{font-size:9px;padding:3px 9px;border-radius:9px;background:var(--bg3);border:1px solid var(--border);color:var(--text3);flex-shrink:0}
+.tree-node.unlocked .tn-req{background:rgba(76,175,125,.1);border-color:rgba(76,175,125,.3);color:var(--green)}
+.tree-conn{width:2px;height:14px;background:var(--border);margin:0 auto -2px;position:relative;z-index:0}
+.tree-conn.active{background:rgba(240,192,64,.4)}
+
+/* WORLD MAP */
+.map-wrap{padding:8px 0}
+.map-path{position:relative}
+.zone-row{display:flex;align-items:center;gap:0;margin-bottom:0}
+.zone-line{flex:1;height:2px;background:var(--border)}
+.zone-line.done{background:rgba(240,192,64,.4)}
+.zone-dot-wrap{display:flex;flex-direction:column;align-items:center;padding:6px}
+.zone-dot{width:52px;height:52px;border-radius:50%;border:2px solid var(--border);background:var(--card);display:flex;align-items:center;justify-content:center;font-size:22px;transition:all .3s;cursor:pointer}
+.zone-dot.unlocked{border-color:var(--gold);box-shadow:0 0 18px rgba(240,192,64,.25)}
+.zone-dot.current{border-color:var(--cyan);box-shadow:0 0 20px rgba(61,217,197,.35);animation:zp 2s infinite}
+.zone-dot.locked{filter:brightness(.3) grayscale(.5)}
+@keyframes zp{0%,100%{box-shadow:0 0 16px rgba(61,217,197,.35)}50%{box-shadow:0 0 30px rgba(61,217,197,.6)}}
+.zone-lbl{font-size:9px;margin-top:4px;text-align:center;color:var(--text2);font-weight:500;max-width:60px}
+.zone-lbl.current{color:var(--cyan)}.zone-lbl.locked{color:var(--text3)}
+.zone-side{flex:1;padding:0 6px}
+.zone-sn{font-size:13px;font-weight:600;margin-bottom:2px}
+.zone-sr{font-size:10px;color:var(--text3)}
+
+/* INVENTORY */
+.inv-tabs{display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.inv-tabs::-webkit-scrollbar{display:none}
+.inv-tab{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;color:var(--text2);font-family:'Vazirmatn',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
+.inv-tab.active{background:var(--card2);border-color:var(--border2);color:var(--text);font-weight:600}
+.inv-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.inv-slot{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .2s;position:relative;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.inv-slot:hover{transform:translateY(-2px)}
+.inv-slot.empty{border-style:dashed;opacity:.3}
+.inv-slot.equipped{border-color:var(--gold);background:rgba(240,192,64,.05)}
+.inv-slot-icon{font-size:26px;margin-bottom:4px}
+.inv-slot-name{font-size:9px;font-weight:600;margin-bottom:2px}
+.inv-slot-rarity{font-size:8px;font-weight:700;letter-spacing:.5px}
+.inv-slot-rarity.common{color:var(--common)}.inv-slot-rarity.rare{color:var(--rare)}.inv-slot-rarity.epic{color:var(--epic)}.inv-slot-rarity.legendary{color:var(--legendary)}.inv-slot-rarity.mythic{color:var(--mythic)}
+.inv-equipped-badge{position:absolute;top:4px;right:4px;background:var(--gold);color:#06070d;font-size:7px;padding:1px 4px;border-radius:5px;font-weight:700}
+.rarity-border.common{border-color:rgba(159,163,184,.3)}.rarity-border.rare{border-color:rgba(91,141,238,.4)}.rarity-border.epic{border-color:rgba(155,109,255,.4)}.rarity-border.legendary{border-color:rgba(240,192,64,.5)}.rarity-border.mythic{border-color:rgba(255,107,157,.5)}
+
+/* SHOP */
+.shop-hdr{margin-bottom:14px}
+.shop-gold-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.shop-gb{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);border-radius:20px;padding:5px 14px;font-size:13px;color:var(--gold);font-weight:700}
+.shop-tabs{display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.shop-tabs::-webkit-scrollbar{display:none}
+.shop-tab{flex-shrink:0;background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;color:var(--text2);font-family:'Vazirmatn',sans-serif;font-size:11px;cursor:pointer;transition:all .2s}
+.shop-tab.active{background:var(--card2);border-color:var(--border2);color:var(--text);font-weight:600}
+.shop-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.shop-item{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;cursor:pointer;position:relative;transition:all .25s;overflow:hidden}
+.shop-item:not(.owned):not(.cant):hover{transform:translateY(-3px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.shop-item.owned{border-color:rgba(76,175,125,.35);background:rgba(76,175,125,.04)}
+.shop-item.cant{opacity:.4;cursor:not-allowed}
+.shop-owned{position:absolute;top:7px;right:7px;background:var(--green);color:#fff;font-size:8px;padding:2px 5px;border-radius:7px;font-weight:600}
+.shop-rarity-line{position:absolute;top:0;left:0;right:0;height:2px;border-radius:16px 16px 0 0}
+.shop-rarity-line.common{background:var(--common)}.shop-rarity-line.rare{background:var(--rare)}.shop-rarity-line.epic{background:var(--epic)}.shop-rarity-line.legendary{background:linear-gradient(90deg,var(--gold),var(--gold2),var(--gold))}.shop-rarity-line.mythic{background:linear-gradient(90deg,var(--pink),var(--purple),var(--pink))}
+.shop-icon{font-size:30px;margin-bottom:6px;margin-top:4px}
+.shop-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.shop-bonus{font-size:9px;color:var(--cyan);margin-bottom:8px;min-height:24px}
+.shop-price{display:inline-flex;align-items:center;gap:3px;background:rgba(240,192,64,.08);border:1px solid rgba(240,192,64,.2);border-radius:9px;padding:3px 10px;font-size:11px;color:var(--gold)}
+
+/* PETS PAGE */
+.pets-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-bottom:12px}
+.pet-card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;text-align:center;cursor:pointer;transition:all .25s;position:relative}
+.pet-card:hover:not(.locked-pet){transform:translateY(-3px)}
+.pet-card.active-pet{border-color:var(--cyan);background:rgba(61,217,197,.05)}
+.pet-card.locked-pet{opacity:.4;cursor:not-allowed}
+.pet-icon{font-size:36px;margin-bottom:6px;display:block}
+.pet-name{font-size:12px;font-weight:600;margin-bottom:3px}
+.pet-bonus{font-size:10px;color:var(--cyan);margin-bottom:8px}
+.pet-active-badge{position:absolute;top:8px;right:8px;background:var(--cyan);color:#06070d;font-size:8px;padding:2px 5px;border-radius:7px;font-weight:700}
+.pet-req{font-size:9px;color:var(--text3)}
+
+/* PROFILE */
+.profile-hero{text-align:center;padding:20px 0 14px}
+.profile-av{font-size:54px;margin-bottom:10px}
+.profile-name-row{display:flex;gap:7px;justify-content:center;margin-bottom:6px}
+.pni{background:var(--card);border:1px solid var(--border);border-radius:11px;padding:9px 14px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:14px;font-weight:600;outline:none;text-align:center;width:180px;transition:border-color .2s}
+.pni:focus{border-color:var(--gold)}
+.psb{background:var(--green);color:#fff;border:none;border-radius:11px;padding:9px 14px;font-size:14px;cursor:pointer;transition:all .2s}
+.psb:hover{background:#5dba90}
+.profile-class{font-size:11px;color:var(--text3);font-family:'Cinzel',serif;margin-bottom:4px}
+.profile-title{font-size:13px;color:var(--gold);font-family:'Cinzel',serif}
+.stats-full{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-bottom:12px}
+.sf-card{background:var(--card);border:1px solid var(--border);border-radius:13px;padding:12px 7px;text-align:center}
+.sf-val{font-size:20px;font-weight:800}
+.sf-lbl{font-size:9px;color:var(--text2);margin-top:2px}
+.activity-chart{display:flex;gap:2px;align-items:flex-end;height:56px;padding:0 3px;margin-bottom:6px}
+.act-bar{flex:1;border-radius:2px 2px 0 0;background:var(--border);min-height:3px;transition:all .4s ease;cursor:pointer}
+.act-bar.has-data{background:linear-gradient(0deg,var(--blue),var(--purple))}
+
+/* SETTINGS PAGE */
+.settings-section{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px}
+.settings-row{display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+.settings-row:last-child{border-bottom:none}
+.settings-lbl{font-size:13px}
+.settings-sub{font-size:10px;color:var(--text3);margin-top:1px}
+.toggle{width:44px;height:24px;border-radius:12px;background:var(--border);border:none;cursor:pointer;position:relative;transition:background .3s;flex-shrink:0}
+.toggle.on{background:var(--green)}
+.toggle::after{content:'';position:absolute;width:18px;height:18px;border-radius:50%;background:white;top:3px;left:3px;transition:left .3s}
+.toggle.on::after{left:23px}
+.reset-btn{width:100%;background:rgba(232,93,93,.06);border:1px solid rgba(232,93,93,.2);border-radius:11px;padding:11px;color:var(--red);font-family:'Vazirmatn',sans-serif;font-size:12px;cursor:pointer;transition:all .2s}
+.reset-btn:hover{background:rgba(232,93,93,.12)}
+
+/* BOTTOM NAV */
+.bottom-nav{position:fixed;bottom:0;left:0;right:0;z-index:100;background:rgba(6,7,13,.96);backdrop-filter:blur(24px);border-top:1px solid var(--border);display:flex;height:68px;max-width:480px;margin:0 auto;padding-bottom:env(safe-area-inset-bottom)}
+.nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;cursor:pointer;transition:all .2s;border:none;background:none;color:var(--text3);font-family:'Vazirmatn',sans-serif;position:relative}
+.nav-item.active{color:var(--gold)}
+.nav-item.active::after{content:'';position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);width:24px;height:2px;background:var(--gold);border-radius:1px}
+.nav-icon{font-size:18px;transition:transform .2s}
+.nav-item.active .nav-icon{transform:scale(1.15)}
+.nav-lbl{font-size:8px;letter-spacing:.2px}
+
+/* MODALS */
+.modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.8);backdrop-filter:blur(14px);align-items:center;justify-content:center;padding:16px}
+.modal-overlay.open{display:flex;animation:mfin .2s ease}
+@keyframes mfin{from{opacity:0}to{opacity:1}}
+.modal-box{background:var(--card);border:1px solid var(--border2);border-radius:22px;padding:22px;width:100%;max-width:380px;box-shadow:var(--shadow);animation:msin .3s cubic-bezier(.4,0,.2,1)}
+@keyframes msin{from{transform:translateY(20px);opacity:0}to{transform:translateY(0);opacity:1}}
+.modal-box.bs{position:fixed;bottom:0;left:0;right:0;max-width:100%;border-radius:22px 22px 0 0;animation:msbot .3s cubic-bezier(.4,0,.2,1);max-height:90dvh;overflow-y:auto}
+@keyframes msbot{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:34px;height:3px;background:var(--border2);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-family:'Cinzel',serif;font-size:16px;font-weight:700;color:var(--gold);margin-bottom:4px}
+.modal-sub{font-size:11px;color:var(--text2);margin-bottom:18px}
+
+/* CLASS GRID */
+.class-grid{display:flex;flex-direction:column;gap:8px;max-height:60vh;overflow-y:auto}
+.class-branch{margin-bottom:4px}
+.branch-title{font-size:10px;color:var(--text3);letter-spacing:1px;margin-bottom:6px;padding-right:4px;text-transform:uppercase;font-family:'Cinzel',serif}
+.class-opts-row{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
+.class-opt{background:var(--bg3);border:1px solid var(--border);border-radius:13px;padding:12px 8px;text-align:center;cursor:pointer;transition:all .25s;position:relative;overflow:hidden}
+.class-opt:hover{transform:translateY(-2px)}
+.class-opt-glow{position:absolute;inset:0;opacity:0;transition:opacity .3s;border-radius:13px}
+.class-opt:hover .class-opt-glow{opacity:1}
+.class-opt-icon{font-size:24px;margin-bottom:5px}
+.class-opt-name{font-size:12px;font-weight:700;margin-bottom:3px;font-family:'Cinzel',serif}
+.class-opt-bonus{font-size:9px;color:var(--text2)}
+
+/* CHARACTER CREATOR */
+.char-creator{padding:4px 0}
+.cc-section{margin-bottom:16px}
+.cc-title{font-size:11px;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:1px}
+.cc-preview{width:80px;height:100px;margin:0 auto 16px;position:relative}
+.color-opts{display:flex;gap:6px;flex-wrap:wrap}
+.color-opt{width:28px;height:28px;border-radius:50%;cursor:pointer;border:2px solid transparent;transition:all .2s}
+.color-opt.selected{border-color:white;transform:scale(1.2)}
+.style-opts{display:flex;gap:6px;flex-wrap:wrap}
+.style-opt{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:5px 10px;cursor:pointer;font-size:14px;transition:all .2s}
+.style-opt.selected{border-color:var(--gold);background:rgba(240,192,64,.1)}
+
+/* ITEM DETAIL MODAL */
+.item-detail{text-align:center;padding:8px 0}
+.item-detail-icon{font-size:52px;margin-bottom:8px}
+.item-detail-name{font-size:18px;font-weight:700;margin-bottom:4px}
+.item-detail-rarity{font-size:12px;font-weight:700;letter-spacing:1px;margin-bottom:12px}
+.item-detail-stats{background:var(--bg3);border:1px solid var(--border);border-radius:12px;padding:12px;margin-bottom:12px;text-align:right}
+.ids-row{display:flex;justify-content:space-between;font-size:12px;padding:4px 0;border-bottom:1px solid var(--border)}
+.ids-row:last-child{border-bottom:none}
+.ids-lbl{color:var(--text2)}
+.ids-val{font-weight:600}
+
+/* LEVEL UP */
+.lu-box{text-align:center;position:relative;overflow:hidden;background:linear-gradient(135deg,#1a1d28,#0c0e18)}
+.lu-rays{position:absolute;inset:0;background:conic-gradient(from 0deg,transparent 0deg,rgba(240,192,64,.04) 10deg,transparent 20deg,transparent 30deg,rgba(240,192,64,.04) 40deg,transparent 50deg);animation:rspin 8s linear infinite}
+@keyframes rspin{to{transform:rotate(360deg)}}
+.lu-icon{font-size:46px;margin-bottom:6px;animation:bounce .5s ease}
+@keyframes bounce{0%,100%{transform:scale(1)}50%{transform:scale(1.3)}}
+.lu-title{font-family:'Cinzel',serif;font-size:20px;font-weight:900;color:var(--gold);letter-spacing:3px;margin-bottom:6px}
+.lu-lvl{font-family:'Cinzel',serif;font-size:60px;font-weight:900;background:linear-gradient(135deg,var(--gold),var(--gold2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+.lu-rewards{display:flex;gap:8px;justify-content:center;margin:10px 0}
+.lu-rew-badge{background:rgba(240,192,64,.1);border:1px solid rgba(240,192,64,.25);border-radius:10px;padding:4px 12px;font-size:12px;color:var(--gold)}
+.lu-sub{font-size:12px;color:var(--text2);margin-top:4px}
+
+/* BOSS DEFEAT */
+.bd-box{text-align:center}
+.bd-icon{font-size:50px;margin-bottom:6px;animation:shake .5s ease}
+@keyframes shake{0%,100%{transform:rotate(0)}25%{transform:rotate(-10deg)}75%{transform:rotate(10deg)}}
+.bd-title{font-family:'Cinzel',serif;font-size:18px;color:var(--red);font-weight:900;letter-spacing:2px;margin-bottom:6px}
+.bd-reward{font-size:22px;font-weight:800;color:var(--gold)}
+
+/* FORMS */
+.form-group{margin-bottom:12px}
+.form-label{font-size:10px;color:var(--text2);margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.5px}
+.form-input{width:100%;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px 13px;color:var(--text);font-family:'Vazirmatn',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.form-input:focus{border-color:var(--gold)}
+select.form-input option{background:var(--bg2)}
+.form-row{display:flex;gap:8px}
+.form-row .form-group{flex:1}
+.modal-btns{display:flex;gap:8px;margin-top:14px}
+.btn-primary{flex:1;background:var(--gold);color:#06070d;border:none;border-radius:11px;padding:12px;font-family:'Vazirmatn',sans-serif;font-weight:800;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-primary:hover{background:var(--gold2);transform:scale(1.02)}
+.btn-cancel{flex:1;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:11px;padding:12px;font-family:'Vazirmatn',sans-serif;font-size:13px;cursor:pointer;transition:all .2s}
+.btn-cancel:hover{background:var(--bg2)}
+
+/* TOAST & XP FLOAT */
+.toast-c{position:fixed;bottom:88px;left:50%;transform:translateX(-50%);display:flex;flex-direction:column;gap:6px;align-items:center;z-index:300;pointer-events:none}
+.toast{background:var(--card2);border:1px solid var(--border2);border-radius:13px;padding:9px 18px;font-size:12px;font-weight:500;box-shadow:var(--shadow);animation:tin .3s ease,tout .3s ease 2.2s forwards;white-space:nowrap}
+.toast.gold{border-color:rgba(240,192,64,.4);color:var(--gold)}
+.toast.green{border-color:rgba(76,175,125,.4);color:var(--green)}
+.toast.red{border-color:rgba(232,93,93,.4);color:var(--red)}
+.toast.purple{border-color:rgba(155,109,255,.4);color:var(--purple)}
+@keyframes tin{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+@keyframes tout{from{opacity:1}to{opacity:0;transform:translateY(-8px)}}
+.xp-fc{position:fixed;inset:0;pointer-events:none;z-index:250}
+.xp-f{position:absolute;font-family:'Cinzel',serif;font-weight:800;font-size:16px;color:var(--gold);text-shadow:0 0 10px rgba(240,192,64,.6);animation:xpfl 1.3s ease-out forwards}
+@keyframes xpfl{0%{opacity:1;transform:translateY(0) scale(1)}60%{opacity:1;transform:translateY(-55px) scale(1.15)}100%{opacity:0;transform:translateY(-90px) scale(.8)}}
+.confetti-p{position:fixed;pointer-events:none;z-index:500;border-radius:2px;animation:cfall var(--d,1.5s) ease-out forwards}
+@keyframes cfall{0%{opacity:1;transform:translateY(0) rotate(0) scale(1)}80%{opacity:1}100%{opacity:0;transform:translateY(var(--ty,200px)) translateX(var(--tx,0px)) rotate(var(--r,720deg)) scale(.2)}}
+.ripple{position:absolute;border-radius:50%;background:rgba(240,192,64,.2);transform:scale(0);animation:rippleA .6s ease-out;pointer-events:none}
+@keyframes rippleA{to{transform:scale(4);opacity:0}}
+</style>
 </head>
 <body>
-
-<!-- PARTICLE CANVAS -->
-<canvas id="particleCanvas"></canvas>
+<canvas id="bgCanvas"></canvas>
 
 <!-- TOPBAR -->
-<div class="topbar" id="topbar">
-  <div class="topbar-title">
-    <span class="title-quest">QUEST</span><span class="title-life">LIFE</span>
-  </div>
-  <div class="topbar-right">
-    <div class="topbar-streak" id="topStreak">🔥 0</div>
-    <div class="topbar-level" id="topLevel">
-      <span>LVL</span><strong id="topLvl">1</strong>
-    </div>
+<div class="topbar">
+  <div class="topbar-title"><span class="title-q">QUEST</span><span class="title-l">LIFE</span></div>
+  <div class="topbar-r">
+    <div class="top-badge streak" id="topStreak">🔥 0</div>
+    <div class="top-badge level">LVL <strong id="topLvl">1</strong></div>
+    <div class="top-badge gold">🪙 <span id="topGold">0</span></div>
   </div>
 </div>
 
-<!-- MAIN -->
 <main>
 
-  <!-- ═══════ DASHBOARD ═══════ -->
-  <div class="page active" id="page-dashboard">
+<!-- ══════════════════════════════════════
+     DASHBOARD
+══════════════════════════════════════ -->
+<div class="page active" id="page-dashboard">
 
-    <div class="player-card" id="playerCard">
-      <div class="card-glow"></div>
-      <div class="player-header">
-        <div class="avatar-wrap" id="avatarWrap" onclick="openClassModal()">
-          <div class="avatar-ring"></div>
-          <div class="avatar-emoji" id="avatarEmoji">⚔️</div>
-          <div class="avatar-level" id="avatarLevel">1</div>
+  <div class="player-card">
+    <div class="card-glow"></div>
+    <div class="pc-top">
+      <div class="avatar-3d" id="avatar3d" onclick="openClassModal()">
+        <div class="char-body">
+          <div class="char-head" id="charHead">😐</div>
+          <div class="char-body-part" id="charBodyPart">👕</div>
+          <div class="char-weapon" id="charWeapon"></div>
+          <div class="char-pet" id="charPet"></div>
+          <div class="char-aura" id="charAura"></div>
         </div>
-        <div class="player-info">
-          <div class="player-name" id="playerName">Hero</div>
-          <div class="player-class" id="playerClass">
-            <span class="class-badge none">انتخاب کلاس ←</span>
-          </div>
-          <div class="player-title" id="playerTitle">تازه‌کار</div>
-        </div>
-        <div class="player-gold">
-          <div class="gold-icon">🪙</div>
-          <div class="gold-val" id="goldVal">0</div>
-        </div>
+        <div class="avatar-lv" id="avatarLv">1</div>
       </div>
-
-      <div class="bars-section">
-        <div class="bar-row">
-          <div class="bar-label">
-            <span>❤️ HP</span>
-            <span id="hpText">100/100</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill hp-bar" id="hpBar" style="width:100%">
-              <div class="bar-shine"></div>
-            </div>
-          </div>
-        </div>
-        <div class="bar-row">
-          <div class="bar-label">
-            <span>⭐ XP</span>
-            <span id="xpText">0/100</span>
-          </div>
-          <div class="bar-track">
-            <div class="bar-fill xp-bar" id="xpBar" style="width:0%">
-              <div class="bar-shine"></div>
-            </div>
-          </div>
-        </div>
+      <div class="pc-info">
+        <div class="pc-name" id="pcName">Hero</div>
+        <div id="pcClassBadge"><span class="pc-class-badge" style="color:var(--text3);border-color:var(--border)" onclick="openClassModal()">کلاس ←</span></div>
+        <div class="pc-title" id="pcTitle">تازه‌کار</div>
+        <div class="pc-gold-row">🪙 <span id="pcGold">0</span></div>
       </div>
     </div>
+    <div class="bar-row">
+      <div class="bar-lbl"><span>❤️ HP</span><span id="hpTxt">100/100</span></div>
+      <div class="bar-track"><div class="bar-fill hp-bar" id="hpBar" style="width:100%"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl"><span>⭐ XP</span><span id="xpTxt">0/100</span></div>
+      <div class="bar-track"><div class="bar-fill xp-bar" id="xpBar" style="width:0%"></div></div>
+    </div>
+    <div class="bar-row">
+      <div class="bar-lbl"><span>💧 Mana</span><span id="manaTxt">50/50</span></div>
+      <div class="bar-track"><div class="bar-fill mana-bar" id="manaBar" style="width:100%"></div></div>
+    </div>
+  </div>
 
-    <!-- STATS -->
-    <div class="section-header">
-      <div class="section-title">مهارت‌ها</div>
-      <div class="section-sub" id="totalPower">Power: 0</div>
-    </div>
-    <div class="skills-grid" id="skillsGrid">
-      <div class="skill-card str" onclick="showStatInfo('str')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">⚔️</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-str" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-str">0</div>
-        <div class="skill-name">STR</div>
-      </div>
-      <div class="skill-card int" onclick="showStatInfo('int')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">📚</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-int" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-int">0</div>
-        <div class="skill-name">INT</div>
-      </div>
-      <div class="skill-card wis" onclick="showStatInfo('wis')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">🔮</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-wis" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-wis">0</div>
-        <div class="skill-name">WIS</div>
-      </div>
-      <div class="skill-card com" onclick="showStatInfo('com')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">🗣️</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-com" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-com">0</div>
-        <div class="skill-name">COM</div>
-      </div>
-      <div class="skill-card eng" onclick="showStatInfo('eng')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">⚙️</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-eng" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-eng">0</div>
-        <div class="skill-name">ENG</div>
-      </div>
-      <div class="skill-card vit" onclick="showStatInfo('vit')">
-        <div class="skill-glow"></div>
-        <div class="skill-icon">❤️</div>
-        <div class="skill-bar-wrap"><div class="skill-bar-fill" id="bar-vit" style="width:0%"></div></div>
-        <div class="skill-val" id="stat-vit">0</div>
-        <div class="skill-name">VIT</div>
-      </div>
-    </div>
+  <div class="sh"><div class="st">مهارت‌ها</div><div class="ss" id="totalPower">Power: 0</div></div>
+  <div class="stats-grid">
+    <div class="stat-c s-str" onclick="showStatModal('str')"><div class="sg"></div><div class="si">⚔️</div><div class="sb-w"><div class="sb-f" id="bar-str" style="width:0%;color:var(--red)"></div></div><div class="sv" id="stat-str">0</div><div class="sn">STR</div></div>
+    <div class="stat-c s-int" onclick="showStatModal('int')"><div class="sg"></div><div class="si">📚</div><div class="sb-w"><div class="sb-f" id="bar-int" style="width:0%;color:var(--blue)"></div></div><div class="sv" id="stat-int">0</div><div class="sn">INT</div></div>
+    <div class="stat-c s-wis" onclick="showStatModal('wis')"><div class="sg"></div><div class="si">🔮</div><div class="sb-w"><div class="sb-f" id="bar-wis" style="width:0%;color:var(--purple)"></div></div><div class="sv" id="stat-wis">0</div><div class="sn">WIS</div></div>
+    <div class="stat-c s-com" onclick="showStatModal('com')"><div class="sg"></div><div class="si">🗣️</div><div class="sb-w"><div class="sb-f" id="bar-com" style="width:0%;color:var(--cyan)"></div></div><div class="sv" id="stat-com">0</div><div class="sn">COM</div></div>
+    <div class="stat-c s-eng" onclick="showStatModal('eng')"><div class="sg"></div><div class="si">⚙️</div><div class="sb-w"><div class="sb-f" id="bar-eng" style="width:0%;color:var(--orange)"></div></div><div class="sv" id="stat-eng">0</div><div class="sn">ENG</div></div>
+    <div class="stat-c s-vit" onclick="showStatModal('vit')"><div class="sg"></div><div class="si">❤️</div><div class="sb-w"><div class="sb-f" id="bar-vit" style="width:0%;color:var(--green)"></div></div><div class="sv" id="stat-vit">0</div><div class="sn">VIT</div></div>
+  </div>
 
-    <!-- BOSS -->
-    <div class="section-header">
-      <div class="section-title">Boss</div>
-      <div class="section-sub" id="bossSubtitle">باس فعلی</div>
-    </div>
-    <div class="boss-card" id="bossCard">
-      <div class="boss-bg-effect"></div>
-      <div class="boss-left">
-        <div class="boss-avatar" id="bossAvatar">👾</div>
-        <div class="boss-health-ring">
-          <svg viewBox="0 0 60 60">
-            <circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,0.08)" stroke-width="4"/>
-            <circle cx="30" cy="30" r="26" fill="none" stroke="#e85d5d" stroke-width="4"
-              stroke-dasharray="163" id="bossRingFill" stroke-dashoffset="0"
-              stroke-linecap="round" transform="rotate(-90 30 30)"/>
-          </svg>
-        </div>
+  <div class="sh"><div class="st">Boss</div><div class="ss" id="bossSub">باس فعلی</div></div>
+  <div class="boss-card" id="bossCard">
+    <div class="boss-bg"></div>
+    <div class="boss-row">
+      <div class="boss-av">
+        <span class="boss-emoji" id="bossEm">👾</span>
+        <div class="boss-ring"><svg viewBox="0 0 60 60"><circle cx="30" cy="30" r="26" fill="none" stroke="rgba(255,255,255,.07)" stroke-width="4"/><circle cx="30" cy="30" r="26" fill="none" stroke="#e85d5d" stroke-width="4" stroke-dasharray="163" id="bossRing" stroke-dashoffset="0" stroke-linecap="round" transform="rotate(-90 30 30)"/></svg></div>
       </div>
-      <div class="boss-right">
+      <div class="boss-info">
         <div class="boss-name" id="bossName">Procrastination</div>
-        <div class="boss-hp-bar-wrap">
-          <div class="boss-hp-track">
-            <div class="bar-fill boss-bar" id="bossHpBar" style="width:100%">
-              <div class="bar-shine"></div>
-            </div>
-          </div>
-          <div class="boss-hp-text" id="bossHpText">500 / 500</div>
-        </div>
-        <div class="boss-damage-preview" id="bossDmgPreview">هر مأموریت = ضربه 💥</div>
+        <div class="boss-ht"><div class="boss-hf" id="bossHpFill" style="width:100%"></div></div>
+        <div class="boss-ht2"><span id="bossHpTxt">500/500</span><span id="bossDmg">هر مأموریت = ضربه 💥</span></div>
       </div>
     </div>
-
-    <!-- DAILY CHALLENGE -->
-    <div class="section-header">
-      <div class="section-title">Daily Challenge</div>
-      <div class="section-sub" id="challengeTimer">--:--:--</div>
-    </div>
-    <div class="challenge-card" id="challengeCard">
-      <div class="challenge-icon" id="challengeIcon">🎯</div>
-      <div class="challenge-info">
-        <div class="challenge-name" id="challengeName">در حال بارگذاری...</div>
-        <div class="challenge-reward" id="challengeReward">جایزه: --</div>
-      </div>
-      <button class="challenge-btn" id="challengeBtn" onclick="completeChallenge()">انجام</button>
-    </div>
-
-    <!-- ACHIEVEMENTS PREVIEW -->
-    <div class="section-header">
-      <div class="section-title">دستاوردها</div>
-      <div class="section-sub" id="achCount">0/0</div>
-    </div>
-    <div class="ach-scroll" id="achScroll"></div>
-
   </div>
 
-  <!-- ═══════ QUESTS ═══════ -->
-  <div class="page" id="page-quests">
-
-    <div class="quest-header">
-      <div class="quest-date" id="questDate"></div>
-      <div class="quest-progress-ring">
-        <svg viewBox="0 0 48 48">
-          <circle cx="24" cy="24" r="20" fill="none" stroke="var(--border)" stroke-width="4"/>
-          <circle cx="24" cy="24" r="20" fill="none" stroke="var(--gold)" stroke-width="4"
-            stroke-dasharray="125.6" id="questRing" stroke-dashoffset="125.6"
-            stroke-linecap="round" transform="rotate(-90 24 24)"/>
-        </svg>
-        <span id="questRingText">0%</span>
-      </div>
-    </div>
-
-    <div class="section-title" style="margin-bottom:12px">مأموریت‌های روزانه</div>
-    <div class="quest-list" id="questList"></div>
-    <button class="add-quest-btn" onclick="openQuestModal()">
-      <span>+</span> مأموریت سفارشی
-    </button>
-
-    <div class="divider"></div>
-
-    <div class="section-title" style="margin-bottom:12px">مأموریت‌های پیش‌فرض</div>
-    <div class="quest-list" id="defaultQuestList"></div>
-
+  <div class="sh"><div class="st">Daily Challenge</div><div class="ss" id="chTimer">--:--:--</div></div>
+  <div class="ch-card">
+    <div class="ch-icon" id="chIcon">🎯</div>
+    <div class="ch-info"><div class="ch-name" id="chName">...</div><div class="ch-rew" id="chRew"></div></div>
+    <button class="ch-btn" id="chBtn" onclick="completeChallenge()">انجام</button>
   </div>
 
-  <!-- ═══════ SKILL TREE ═══════ -->
-  <div class="page" id="page-skilltree">
+  <div class="sh"><div class="st">دستاوردها</div><div class="ss" id="achCount">0/0</div></div>
+  <div class="ach-scroll" id="achScroll"></div>
 
-    <div class="section-title" style="margin-bottom:16px">درخت مهارت</div>
-    <div class="tree-tabs" id="treeTabs">
-      <button class="tree-tab active" onclick="switchTree('str',this)">⚔️ STR</button>
-      <button class="tree-tab" onclick="switchTree('int',this)">📚 INT</button>
-      <button class="tree-tab" onclick="switchTree('wis',this)">🔮 WIS</button>
-      <button class="tree-tab" onclick="switchTree('eng',this)">⚙️ ENG</button>
-    </div>
-    <div class="skill-tree-wrap" id="skillTreeWrap"></div>
+</div>
 
+<!-- ══════════════════════════════════════
+     QUESTS
+══════════════════════════════════════ -->
+<div class="page" id="page-quests">
+  <div class="qh">
+    <div class="qdate" id="qDate"></div>
+    <div class="qring"><svg viewBox="0 0 48 48"><circle cx="24" cy="24" r="20" fill="none" stroke="var(--border)" stroke-width="4"/><circle cx="24" cy="24" r="20" fill="none" stroke="var(--gold)" stroke-width="4" stroke-dasharray="125.6" id="qRing" stroke-dashoffset="125.6" stroke-linecap="round" transform="rotate(-90 24 24)"/></svg><span id="qRingTxt">0%</span></div>
   </div>
-
-  <!-- ═══════ MAP ═══════ -->
-  <div class="page" id="page-map">
-
-    <div class="section-title" style="margin-bottom:16px">نقشه جهان</div>
-    <div class="world-map-wrap">
-      <div class="map-path" id="mapPath"></div>
-    </div>
-
+  <div class="qtabs">
+    <button class="qtab active" onclick="switchQTab('daily',this)">🌅 Daily</button>
+    <button class="qtab" onclick="switchQTab('weekly',this)">📅 Weekly</button>
+    <button class="qtab" onclick="switchQTab('monthly',this)">🗓️ Monthly</button>
+    <button class="qtab" onclick="switchQTab('class',this)">⚔️ کلاس</button>
+    <button class="qtab" onclick="switchQTab('custom',this)">✏️ سفارشی</button>
   </div>
+  <div class="quest-list" id="questList"></div>
+  <button class="add-q-btn" onclick="openQuestModal()"><span style="font-size:16px">+</span> مأموریت جدید</button>
+</div>
 
-  <!-- ═══════ SHOP ═══════ -->
-  <div class="page" id="page-shop">
-
-    <div class="shop-header">
-      <div class="shop-title-row">
-        <div class="section-title">فروشگاه</div>
-        <div class="shop-gold-badge">🪙 <span id="shopGold">0</span></div>
-      </div>
-      <div class="shop-tabs">
-        <button class="shop-tab active" onclick="switchShopTab('items',this)">آیتم‌ها</button>
-        <button class="shop-tab" onclick="switchShopTab('boosts',this)">Boost</button>
-      </div>
-    </div>
-    <div class="shop-grid" id="shopGrid"></div>
-
+<!-- ══════════════════════════════════════
+     SKILL TREE
+══════════════════════════════════════ -->
+<div class="page" id="page-skilltree">
+  <div class="sh" style="margin-bottom:14px"><div class="st">درخت مهارت</div><div class="ss" id="skillPoints">💎 0 امتیاز</div></div>
+  <div class="tree-tabs">
+    <button class="tree-tab active" onclick="switchTree('str',this)">⚔️ STR</button>
+    <button class="tree-tab" onclick="switchTree('int',this)">📚 INT</button>
+    <button class="tree-tab" onclick="switchTree('wis',this)">🔮 WIS</button>
+    <button class="tree-tab" onclick="switchTree('com',this)">🗣️ COM</button>
+    <button class="tree-tab" onclick="switchTree('eng',this)">⚙️ ENG</button>
+    <button class="tree-tab" onclick="switchTree('vit',this)">❤️ VIT</button>
   </div>
+  <div id="treeWrap"></div>
+</div>
 
-  <!-- ═══════ PROFILE ═══════ -->
-  <div class="page" id="page-profile">
+<!-- ══════════════════════════════════════
+     MAP
+══════════════════════════════════════ -->
+<div class="page" id="page-map">
+  <div class="sh" style="margin-bottom:14px"><div class="st">نقشه جهان</div></div>
+  <div class="map-wrap"><div class="map-path" id="mapPath"></div></div>
+</div>
 
-    <div class="profile-hero">
-      <div class="profile-avatar" id="profileAvatar">⚔️</div>
-      <div class="profile-name-wrap">
-        <input class="profile-name-input" id="nameInput" placeholder="نام شخصیت..." />
-        <button class="profile-save-btn" onclick="saveName()">✓</button>
-      </div>
-      <div class="profile-class-label" id="profileClassLabel">بدون کلاس</div>
-    </div>
-
-    <div class="stats-full-grid" id="statsFullGrid"></div>
-
-    <div class="section-title" style="margin:20px 0 12px">تاریخچه فعالیت</div>
-    <div class="activity-chart" id="activityChart"></div>
-
-    <div class="divider"></div>
-    <button class="reset-btn" onclick="confirmReset()">⚠️ ریست کامل</button>
-
+<!-- ══════════════════════════════════════
+     INVENTORY
+══════════════════════════════════════ -->
+<div class="page" id="page-inventory">
+  <div class="sh" style="margin-bottom:12px"><div class="st">کوله‌پشتی</div><div class="ss" id="invCount">0 آیتم</div></div>
+  <div class="inv-tabs">
+    <button class="inv-tab active" onclick="switchInvTab('all',this)">همه</button>
+    <button class="inv-tab" onclick="switchInvTab('weapon',this)">⚔️ سلاح</button>
+    <button class="inv-tab" onclick="switchInvTab('armor',this)">🛡️ زره</button>
+    <button class="inv-tab" onclick="switchInvTab('accessory',this)">💍 اکسسوری</button>
   </div>
+  <div class="inv-grid" id="invGrid"></div>
+
+  <!-- EQUIPPED -->
+  <div class="sh" style="margin-bottom:10px"><div class="st">تجهیزات فعال</div></div>
+  <div id="equippedDisplay" style="background:var(--card);border:1px solid var(--border);border-radius:16px;padding:14px;margin-bottom:12px">
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px" id="equippedSlots"></div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SHOP
+══════════════════════════════════════ -->
+<div class="page" id="page-shop">
+  <div class="shop-hdr">
+    <div class="shop-gold-row">
+      <div class="st">فروشگاه</div>
+      <div class="shop-gb">🪙 <span id="shopGold">0</span></div>
+    </div>
+    <div class="shop-tabs">
+      <button class="shop-tab active" onclick="switchShopTab('weapon',this)">⚔️ سلاح</button>
+      <button class="shop-tab" onclick="switchShopTab('armor',this)">🛡️ زره</button>
+      <button class="shop-tab" onclick="switchShopTab('accessory',this)">💍 اکسسوری</button>
+      <button class="shop-tab" onclick="switchShopTab('pet',this)">🐾 پت</button>
+      <button class="shop-tab" onclick="switchShopTab('boost',this)">⚡ Boost</button>
+    </div>
+  </div>
+  <div class="shop-grid" id="shopGrid"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PETS
+══════════════════════════════════════ -->
+<div class="page" id="page-pets">
+  <div class="sh" style="margin-bottom:14px"><div class="st">حیوانات همراه</div><div class="ss" id="activePetLabel">بدون پت</div></div>
+  <div class="pets-grid" id="petsGrid"></div>
+</div>
+
+<!-- ══════════════════════════════════════
+     PROFILE
+══════════════════════════════════════ -->
+<div class="page" id="page-profile">
+  <div class="profile-hero">
+    <div class="profile-av" id="profileAv">⚔️</div>
+    <div class="profile-name-row">
+      <input class="pni" id="nameInput" placeholder="نام شخصیت..."/>
+      <button class="psb" onclick="saveName()">✓</button>
+    </div>
+    <div class="profile-class" id="profileClass">بدون کلاس</div>
+    <div class="profile-title" id="profileTitle">تازه‌کار</div>
+  </div>
+  <div class="stats-full" id="statsFullGrid"></div>
+  <div class="sh" style="margin:14px 0 8px"><div class="st">فعالیت ۳۰ روزه</div></div>
+  <div class="activity-chart" id="actChart"></div>
+  <div class="divider"></div>
+  <button class="reset-btn" onclick="confirmReset()">⚠️ ریست کامل</button>
+</div>
 
 </main>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nav-item active" onclick="goPage('dashboard',this)" data-page="dashboard">
-    <div class="nav-icon-wrap"><span class="nav-icon">🏰</span></div>
-    <span class="nav-label">خانه</span>
-  </button>
-  <button class="nav-item" onclick="goPage('quests',this)" data-page="quests">
-    <div class="nav-icon-wrap"><span class="nav-icon">⚔️</span></div>
-    <span class="nav-label">مأموریت</span>
-  </button>
-  <button class="nav-item" onclick="goPage('skilltree',this)" data-page="skilltree">
-    <div class="nav-icon-wrap"><span class="nav-icon">🌳</span></div>
-    <span class="nav-label">مهارت</span>
-  </button>
-  <button class="nav-item" onclick="goPage('map',this)" data-page="map">
-    <div class="nav-icon-wrap"><span class="nav-icon">🗺️</span></div>
-    <span class="nav-label">نقشه</span>
-  </button>
-  <button class="nav-item" onclick="goPage('shop',this)" data-page="shop">
-    <div class="nav-icon-wrap"><span class="nav-icon">🛒</span></div>
-    <span class="nav-label">فروشگاه</span>
-  </button>
-  <button class="nav-item" onclick="goPage('profile',this)" data-page="profile">
-    <div class="nav-icon-wrap"><span class="nav-icon">👤</span></div>
-    <span class="nav-label">پروفایل</span>
-  </button>
+  <button class="nav-item active" onclick="goPage('dashboard',this)"><span class="nav-icon">🏰</span><span class="nav-lbl">خانه</span></button>
+  <button class="nav-item" onclick="goPage('quests',this)"><span class="nav-icon">⚔️</span><span class="nav-lbl">مأموریت</span></button>
+  <button class="nav-item" onclick="goPage('skilltree',this)"><span class="nav-icon">🌳</span><span class="nav-lbl">مهارت</span></button>
+  <button class="nav-item" onclick="goPage('map',this)"><span class="nav-icon">🗺️</span><span class="nav-lbl">نقشه</span></button>
+  <button class="nav-item" onclick="goPage('inventory',this)"><span class="nav-icon">🎒</span><span class="nav-lbl">کوله</span></button>
+  <button class="nav-item" onclick="goPage('shop',this)"><span class="nav-icon">🛒</span><span class="nav-lbl">فروشگاه</span></button>
+  <button class="nav-item" onclick="goPage('pets',this)"><span class="nav-icon">🐾</span><span class="nav-lbl">پت</span></button>
+  <button class="nav-item" onclick="goPage('profile',this)"><span class="nav-icon">👤</span><span class="nav-lbl">پروفایل</span></button>
 </nav>
 
 <!-- ═══════ MODALS ═══════ -->
 
 <!-- CLASS MODAL -->
-<div class="modal-overlay" id="classModal" onclick="closeModal('classModal')">
-  <div class="modal-box" onclick="e=>e.stopPropagation()">
+<div class="modal-overlay" id="classModal" onclick="if(e=>e.target===document.getElementById('classModal'))closeModal('classModal')">
+  <div class="modal-box" style="max-height:85dvh;overflow-y:auto" onclick="event.stopPropagation()">
     <div class="modal-title">⚜️ انتخاب کلاس</div>
-    <div class="modal-sub">وقتی Level 10 بشی می‌تونی تغییرش بدی</div>
-    <div class="class-grid">
-      <div class="class-opt warrior" onclick="selectClass('warrior')">
-        <div class="class-opt-glow"></div>
-        <div class="class-icon">⚔️</div>
-        <div class="class-name">Warrior</div>
-        <div class="class-bonus">+20% XP ورزش</div>
-      </div>
-      <div class="class-opt scholar" onclick="selectClass('scholar')">
-        <div class="class-opt-glow"></div>
-        <div class="class-icon">📚</div>
-        <div class="class-name">Scholar</div>
-        <div class="class-bonus">+20% XP مطالعه</div>
-      </div>
-      <div class="class-opt monk" onclick="selectClass('monk')">
-        <div class="class-opt-glow"></div>
-        <div class="class-icon">🔮</div>
-        <div class="class-name">Monk</div>
-        <div class="class-bonus">+20% XP مدیتیشن</div>
-      </div>
-      <div class="class-opt engineer" onclick="selectClass('engineer')">
-        <div class="class-opt-glow"></div>
-        <div class="class-icon">⚙️</div>
-        <div class="class-name">Engineer</div>
-        <div class="class-bonus">+20% XP کدنویسی</div>
-      </div>
-    </div>
+    <div class="modal-sub">کلاست رو انتخاب کن — هر کلاس مأموریت‌های خاص خودش رو داره</div>
+    <div class="class-grid" id="classGrid"></div>
+    <button class="btn-cancel" onclick="closeModal('classModal')" style="width:100%;margin-top:12px">بعداً</button>
   </div>
 </div>
 
 <!-- QUEST MODAL -->
-<div class="modal-overlay" id="questModal" onclick="closeModal('questModal')">
-  <div class="modal-box bottom-sheet" onclick="e=>e.stopPropagation()">
+<div class="modal-overlay" id="questModal" onclick="if(event.target===this)closeModal('questModal')">
+  <div class="modal-box bs" onclick="event.stopPropagation()">
     <div class="modal-handle"></div>
     <div class="modal-title">➕ مأموریت جدید</div>
-    <div class="form-group">
-      <label class="form-label">عنوان</label>
-      <input class="form-input" id="qTitle" placeholder="مثلاً: ورزش ۳۰ دقیقه" />
-    </div>
+    <div class="form-group"><label class="form-label">عنوان</label><input class="form-input" id="qTitle" placeholder="مثلاً: ورزش ۳۰ دقیقه"/></div>
     <div class="form-row">
-      <div class="form-group">
-        <label class="form-label">مهارت</label>
-        <select class="form-input" id="qStat">
-          <option value="str">⚔️ Strength</option>
-          <option value="int">📚 Intelligence</option>
-          <option value="wis">🔮 Wisdom</option>
-          <option value="com">🗣️ Communication</option>
-          <option value="eng">⚙️ Engineering</option>
-          <option value="vit">❤️ Vitality</option>
+      <div class="form-group"><label class="form-label">نوع</label>
+        <select class="form-input" id="qType">
+          <option value="daily">🌅 Daily</option>
+          <option value="weekly">📅 Weekly</option>
+          <option value="monthly">🗓️ Monthly</option>
         </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">XP</label>
-        <input class="form-input" type="number" id="qXp" value="20" min="5" max="100" />
+      <div class="form-group"><label class="form-label">مهارت</label>
+        <select class="form-input" id="qStat">
+          <option value="str">⚔️ STR</option>
+          <option value="int">📚 INT</option>
+          <option value="wis">🔮 WIS</option>
+          <option value="com">🗣️ COM</option>
+          <option value="eng">⚙️ ENG</option>
+          <option value="vit">❤️ VIT</option>
+        </select>
       </div>
-      <div class="form-group">
-        <label class="form-label">Gold</label>
-        <input class="form-input" type="number" id="qGold" value="10" min="5" max="50" />
-      </div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">XP</label><input class="form-input" type="number" id="qXp" value="20" min="5" max="200"/></div>
+      <div class="form-group"><label class="form-label">Gold</label><input class="form-input" type="number" id="qGold" value="10" min="5" max="100"/></div>
     </div>
     <div class="modal-btns">
       <button class="btn-cancel" onclick="closeModal('questModal')">لغو</button>
@@ -382,46 +662,821 @@
   </div>
 </div>
 
-<!-- STAT INFO MODAL -->
-<div class="modal-overlay" id="statModal" onclick="closeModal('statModal')">
-  <div class="modal-box" onclick="e=>e.stopPropagation()">
-    <div class="stat-modal-content" id="statModalContent"></div>
+<!-- STAT MODAL -->
+<div class="modal-overlay" id="statModal" onclick="if(event.target===this)closeModal('statModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div id="statModalContent"></div>
+  </div>
+</div>
+
+<!-- ITEM DETAIL MODAL -->
+<div class="modal-overlay" id="itemModal" onclick="if(event.target===this)closeModal('itemModal')">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div id="itemModalContent"></div>
   </div>
 </div>
 
 <!-- LEVEL UP MODAL -->
-<div class="modal-overlay" id="levelUpModal">
-  <div class="modal-box levelup-box">
-    <div class="levelup-rays"></div>
-    <div class="levelup-icon">⬆️</div>
-    <div class="levelup-title">LEVEL UP!</div>
-    <div class="levelup-level" id="levelUpNum">2</div>
-    <div class="levelup-sub" id="levelUpSub">تبریک! قدرت بیشتری داری</div>
-    <button class="btn-primary" onclick="closeModal('levelUpModal')" style="width:100%;margin-top:16px">ادامه ⚔️</button>
+<div class="modal-overlay" id="luModal">
+  <div class="modal-box lu-box" onclick="event.stopPropagation()">
+    <div class="lu-rays"></div>
+    <div class="lu-icon">⬆️</div>
+    <div class="lu-title">LEVEL UP!</div>
+    <div class="lu-lvl" id="luNum">2</div>
+    <div class="lu-rewards" id="luRewards"></div>
+    <div class="lu-sub" id="luSub">تبریک!</div>
+    <button class="btn-primary" onclick="closeModal('luModal')" style="width:100%;margin-top:14px">ادامه ⚔️</button>
   </div>
 </div>
 
 <!-- BOSS DEFEAT MODAL -->
-<div class="modal-overlay" id="bossModal">
-  <div class="modal-box boss-defeat-box">
-    <div class="boss-defeat-icon" id="bossDefeatedIcon">💀</div>
-    <div class="boss-defeat-title">BOSS DEFEATED!</div>
-    <div class="boss-defeat-name" id="bossDefeatedName">Procrastination</div>
-    <div class="boss-defeat-reward" id="bossDefeatedReward">+100 Gold</div>
-    <button class="btn-primary" onclick="closeModal('bossModal')" style="width:100%;margin-top:16px">🎉 گرفتم!</button>
+<div class="modal-overlay" id="bdModal">
+  <div class="modal-box bd-box" onclick="event.stopPropagation()">
+    <div class="bd-icon" id="bdIcon">💀</div>
+    <div class="bd-title">BOSS DEFEATED!</div>
+    <div style="font-size:13px;color:var(--text2);margin-bottom:10px" id="bdName"></div>
+    <div class="bd-reward" id="bdReward">+100 🪙</div>
+    <button class="btn-primary" onclick="closeModal('bdModal')" style="width:100%;margin-top:14px">🎉 گرفتم!</button>
   </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast-container" id="toastContainer"></div>
+<div class="toast-c" id="toastC"></div>
+<div class="xp-fc" id="xpFC"></div>
 
-<!-- XP FLOAT -->
-<div class="xp-float-container" id="xpFloats"></div>
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+const D = {
+  XP_PER_LEVEL: l => l * 100,
+  TITLES:[{min:1,max:2,t:'تازه‌کار'},{min:3,max:4,t:'مبارز'},{min:5,max:7,t:'قهرمان'},{min:8,max:10,t:'شوالیه'},{min:11,max:15,t:'اسطوره'},{min:16,max:20,t:'افسانه'},{min:21,max:99,t:'خدای جنگ'}],
+  CLASSES:{
+    warrior:{name:'Warrior',icon:'⚔️',color:'var(--red)',branch:'جنگجو',bonusStat:'str',bonusLabel:'ورزش',avatar:'⚔️'},
+    knight:{name:'Knight',icon:'🛡️',color:'var(--blue)',branch:'جنگجو',bonusStat:'str',bonusLabel:'دفاع',avatar:'🛡️'},
+    berserker:{name:'Berserker',icon:'🪓',color:'var(--red)',branch:'جنگجو',bonusStat:'str',bonusLabel:'حمله',avatar:'🪓'},
+    paladin:{name:'Paladin',icon:'✝️',color:'var(--gold)',branch:'جنگجو',bonusStat:'str',bonusLabel:'قدسی',avatar:'⚜️'},
+    scholar:{name:'Scholar',icon:'📚',color:'var(--blue)',branch:'دانش',bonusStat:'int',bonusLabel:'مطالعه',avatar:'🧙‍♂️'},
+    engineer:{name:'Engineer',icon:'⚙️',color:'var(--orange)',branch:'دانش',bonusStat:'eng',bonusLabel:'کدنویسی',avatar:'🤖'},
+    programmer:{name:'Programmer',icon:'💻',color:'var(--cyan)',branch:'دانش',bonusStat:'eng',bonusLabel:'برنامه‌نویسی',avatar:'👨‍💻'},
+    scientist:{name:'Scientist',icon:'🔬',color:'var(--purple)',branch:'دانش',bonusStat:'int',bonusLabel:'علمی',avatar:'🧪'},
+    monk:{name:'Monk',icon:'🔮',color:'var(--purple)',branch:'روحانی',bonusStat:'wis',bonusLabel:'مدیتیشن',avatar:'🧘'},
+    druid:{name:'Druid',icon:'🌿',color:'var(--green)',branch:'روحانی',bonusStat:'wis',bonusLabel:'طبیعت',avatar:'🌿'},
+    priest:{name:'Priest',icon:'🕊️',color:'var(--gold)',branch:'روحانی',bonusStat:'wis',bonusLabel:'شفا',avatar:'🕊️'},
+    assassin:{name:'Assassin',icon:'🗡️',color:'var(--pink)',branch:'چابک',bonusStat:'com',bonusLabel:'سرعت',avatar:'🗡️'},
+    ranger:{name:'Ranger',icon:'🏹',color:'var(--green)',branch:'چابک',bonusStat:'str',bonusLabel:'تیراندازی',avatar:'🏹'},
+    commander:{name:'Commander',icon:'👑',color:'var(--gold)',branch:'رهبری',bonusStat:'com',bonusLabel:'فرماندهی',avatar:'👑'},
+    merchant:{name:'Merchant',icon:'💰',color:'var(--gold)',branch:'رهبری',bonusStat:'gold',bonusLabel:'تجارت',avatar:'💰'},
+  },
+  BOSSES:[
+    {name:'Procrastination',icon:'👾',hp:500,reward:{gold:100,xp:50}},
+    {name:'Distraction',icon:'📱',hp:800,reward:{gold:150,xp:80}},
+    {name:'Self-Doubt',icon:'😰',hp:1100,reward:{gold:200,xp:120}},
+    {name:'Laziness',icon:'🛋️',hp:1500,reward:{gold:300,xp:180}},
+    {name:'The Dragon',icon:'🐉',hp:2000,reward:{gold:500,xp:300}},
+  ],
+  DAILY_QUESTS:[
+    {id:'dq1',title:'ورزش ۳۰ دقیقه 🏃',xp:25,gold:12,stat:'str',type:'daily'},
+    {id:'dq2',title:'مطالعه ۲۰ صفحه 📚',xp:20,gold:10,stat:'int',type:'daily'},
+    {id:'dq3',title:'۸ لیوان آب 💧',xp:10,gold:5,stat:'vit',type:'daily'},
+    {id:'dq4',title:'۱۵ دقیقه زبان 🌍',xp:15,gold:8,stat:'com',type:'daily'},
+    {id:'dq5',title:'مدیتیشن ۲۰ دقیقه 🧘',xp:18,gold:9,stat:'wis',type:'daily'},
+    {id:'dq6',title:'کدنویسی ۱ ساعت 💻',xp:30,gold:15,stat:'eng',type:'daily'},
+  ],
+  WEEKLY_QUESTS:[
+    {id:'wq1',title:'اتمام یک پروژه 🚀',xp:100,gold:50,stat:'eng',type:'weekly'},
+    {id:'wq2',title:'خواندن یک کتاب 📖',xp:80,gold:40,stat:'int',type:'weekly'},
+    {id:'wq3',title:'۵ روز ورزش متوالی 💪',xp:90,gold:45,stat:'str',type:'weekly'},
+    {id:'wq4',title:'۷ ساعت خواب روزانه 😴',xp:60,gold:30,stat:'vit',type:'weekly'},
+  ],
+  MONTHLY_QUESTS:[
+    {id:'mq1',title:'اتمام دوره آموزشی 🎓',xp:300,gold:150,stat:'int',type:'monthly'},
+    {id:'mq2',title:'کاهش ۲ کیلو ⚖️',xp:250,gold:120,stat:'str',type:'monthly'},
+    {id:'mq3',title:'۳۰ روز streak 🔥',xp:400,gold:200,stat:'vit',type:'monthly'},
+  ],
+  CLASS_QUESTS:{
+    warrior:[{id:'cq-w1',title:'وزنه‌برداری ۴۵ دقیقه 🏋️',xp:35,gold:18,stat:'str',type:'daily'},{id:'cq-w2',title:'دویدن ۵ کیلومتر 🏃',xp:40,gold:20,stat:'str',type:'daily'}],
+    knight:[{id:'cq-k1',title:'تمرین دفاعی ۳۰ دقیقه 🛡️',xp:30,gold:15,stat:'str',type:'daily'},{id:'cq-k2',title:'کمک به دیگران 🤝',xp:25,gold:12,stat:'com',type:'daily'}],
+    scholar:[{id:'cq-s1',title:'خلاصه‌نویسی ۳ صفحه ✍️',xp:25,gold:12,stat:'int',type:'daily'},{id:'cq-s2',title:'مطالعه مقاله علمی 🔬',xp:30,gold:15,stat:'int',type:'daily'}],
+    engineer:[{id:'cq-e1',title:'۱ ساعت کدنویسی ⚙️',xp:35,gold:18,stat:'eng',type:'daily'},{id:'cq-e2',title:'حل یک مسئله الگوریتمی 🧩',xp:40,gold:20,stat:'eng',type:'daily'}],
+    programmer:[{id:'cq-p1',title:'تمرین React ۳۰ دقیقه ⚛️',xp:35,gold:18,stat:'eng',type:'daily'},{id:'cq-p2',title:'مطالعه مستندات 📋',xp:25,gold:12,stat:'int',type:'daily'}],
+    monk:[{id:'cq-m1',title:'مدیتیشن ۳۰ دقیقه 🧘',xp:30,gold:15,stat:'wis',type:'daily'},{id:'cq-m2',title:'یوگا صبحگاهی 🌅',xp:25,gold:12,stat:'vit',type:'daily'}],
+    merchant:[{id:'cq-mer1',title:'ثبت هزینه‌های روزانه 💰',xp:20,gold:10,stat:'com',type:'daily'},{id:'cq-mer2',title:'پس‌انداز امروز 🏦',xp:25,gold:15,stat:'com',type:'daily'}],
+  },
+  DAILY_CHALLENGES:[
+    {title:'همه مأموریت‌های روزانه رو انجام بده!',reward:{xp:80,gold:50},icon:'🏆'},
+    {title:'۵ مأموریت متوالی انجام بده',reward:{xp:50,gold:30},icon:'⚡'},
+    {title:'بدون گوشی ۲ ساعت مطالعه کن',reward:{xp:60,gold:35},icon:'📵'},
+    {title:'زودتر از ۷ صبح بیدار شو',reward:{xp:45,gold:25},icon:'🌅'},
+    {title:'همه آب‌های روزانه رو بنوش',reward:{xp:30,gold:15},icon:'💧'},
+    {title:'یه مهارت جدید یاد بگیر',reward:{xp:70,gold:40},icon:'🚀'},
+    {title:'۱ ساعت بدون وقفه کد بزن',reward:{xp:65,gold:38},icon:'💻'},
+  ],
+  SHOP_ITEMS:[
+    // WEAPONS
+    {id:'iron_sword',name:'Iron Sword',icon:'⚔️',bonus:'+10% XP ورزش',price:80,cat:'weapon',stat:'str',bonusPct:.1,rarity:'common',atk:15,equipped_slot:'weapon'},
+    {id:'steel_sword',name:'Steel Sword',icon:'🗡️',bonus:'+15% XP ورزش',price:150,cat:'weapon',stat:'str',bonusPct:.15,rarity:'rare',atk:25,equipped_slot:'weapon'},
+    {id:'dragon_sword',name:'Dragon Sword',icon:'🔥',bonus:'+25% XP همه',price:350,cat:'weapon',stat:'all',bonusPct:.25,rarity:'epic',atk:50,equipped_slot:'weapon'},
+    {id:'excalibur',name:'Excalibur',icon:'⚜️',bonus:'+40% XP همه',price:800,cat:'weapon',stat:'all',bonusPct:.4,rarity:'legendary',atk:100,equipped_slot:'weapon'},
+    // ARMOR
+    {id:'leather_armor',name:'Leather Armor',icon:'🥋',bonus:'+10 Max HP',price:60,cat:'armor',stat:'hp',bonusPct:0,rarity:'common',hp:10,equipped_slot:'armor'},
+    {id:'iron_armor',name:'Iron Armor',icon:'🛡️',bonus:'+25 Max HP',price:130,cat:'armor',stat:'hp',bonusPct:0,rarity:'rare',hp:25,equipped_slot:'armor'},
+    {id:'dragon_armor',name:'Dragon Armor',icon:'🐉',bonus:'+50 Max HP',price:300,cat:'armor',stat:'hp',bonusPct:0,rarity:'epic',hp:50,equipped_slot:'armor'},
+    // ACCESSORY
+    {id:'ring_int',name:'Ring of INT',icon:'💍',bonus:'+15% XP مطالعه',price:100,cat:'accessory',stat:'int',bonusPct:.15,rarity:'rare',equipped_slot:'ring'},
+    {id:'necklace_all',name:'Necklace of Power',icon:'📿',bonus:'+10% همه XP',price:200,cat:'accessory',stat:'all',bonusPct:.1,rarity:'epic',equipped_slot:'necklace'},
+    {id:'wizard_hat',name:'Wizard Hat',icon:'🎩',bonus:'+10% XP مدیتیشن',price:80,cat:'accessory',stat:'wis',bonusPct:.1,rarity:'common',equipped_slot:'helmet'},
+    {id:'crown',name:'Gold Crown',icon:'👑',bonus:'+20% همه XP',price:400,cat:'accessory',stat:'all',bonusPct:.2,rarity:'legendary',equipped_slot:'helmet'},
+    {id:'running_shoes',name:'Running Shoes',icon:'👟',bonus:'+15% XP ورزش',price:120,cat:'accessory',stat:'str',bonusPct:.15,rarity:'rare',equipped_slot:'boots'},
+    // PETS
+    {id:'pet_wolf',name:'Wolf',icon:'🐺',bonus:'+5 Gold هر مأموریت',price:200,cat:'pet',stat:'gold',bonusPct:.05,rarity:'rare'},
+    {id:'pet_dragon',name:'Dragon',icon:'🐲',bonus:'+10% همه XP',price:500,cat:'pet',stat:'all',bonusPct:.1,rarity:'epic'},
+    {id:'pet_fox',name:'Fox',icon:'🦊',bonus:'+8 Gold هر مأموریت',price:300,cat:'pet',stat:'gold',bonusPct:.08,rarity:'rare'},
+    {id:'pet_phoenix',name:'Phoenix',icon:'🦅',bonus:'+20% XP + +15 Gold',price:700,cat:'pet',stat:'all',bonusPct:.2,rarity:'legendary'},
+    // BOOSTS
+    {id:'boost_xp',name:'XP x2 امروز',icon:'⭐',bonus:'XP دوبرابر یک روز',price:50,cat:'boost',stat:'boost_xp',rarity:'common'},
+    {id:'boost_gold',name:'Gold x2 امروز',icon:'🪙',bonus:'Gold دوبرابر یک روز',price:50,cat:'boost',stat:'boost_gold',rarity:'common'},
+    {id:'hp_potion',name:'HP Potion',icon:'🧪',bonus:'+50 HP فوری',price:30,cat:'boost',stat:'hp_potion',rarity:'common'},
+    {id:'mana_potion',name:'Mana Potion',icon:'💙',bonus:'+50 Mana فوری',price:25,cat:'boost',stat:'mana_potion',rarity:'common'},
+  ],
+  PETS:[
+    {id:'wolf',name:'Wolf',icon:'🐺',bonus:'+5 Gold هر مأموریت',reqLevel:3,stat:'gold',val:5},
+    {id:'fox',name:'Fox',icon:'🦊',bonus:'+8 Gold هر مأموریت',reqLevel:5,stat:'gold',val:8},
+    {id:'dragon',name:'Dragon',icon:'🐲',bonus:'+10% همه XP',reqLevel:8,stat:'xp_all',val:.1},
+    {id:'tiger',name:'Tiger',icon:'🐯',bonus:'+15% XP ورزش',reqLevel:10,stat:'xp_str',val:.15},
+    {id:'phoenix',name:'Phoenix',icon:'🦅',bonus:'+20% همه XP',reqLevel:15,stat:'xp_all',val:.2},
+  ],
+  WORLD_ZONES:[
+    {name:'Village',icon:'🏘️',req:null,reqLabel:'شروع'},
+    {name:'Forest',icon:'🌲',req:{type:'level',val:3},reqLabel:'Level 3'},
+    {name:'Mountain',icon:'⛰️',req:{type:'level',val:5},reqLabel:'Level 5'},
+    {name:'Dark Castle',icon:'🏰',req:{type:'level',val:8},reqLabel:'Level 8'},
+    {name:'Desert',icon:'🏜️',req:{type:'level',val:10},reqLabel:'Level 10'},
+    {name:'Ice Land',icon:'❄️',req:{type:'level',val:12},reqLabel:'Level 12'},
+    {name:'Volcano',icon:'🌋',req:{type:'level',val:15},reqLabel:'Level 15'},
+    {name:'Dragon Realm',icon:'🐉',req:{type:'level',val:20},reqLabel:'Level 20'},
+  ],
+  SKILL_TREES:{
+    str:{color:'#e85d5d',nodes:[{name:'Push-Up Master',desc:'تسلط شنا',icon:'💪',req:5,bonus:'+5% XP ورزش'},{name:'Iron Will',desc:'اراده آهنین',icon:'🏋️',req:15,bonus:'+10% XP ورزش'},{name:'Berserker Mode',desc:'حالت دیوانه',icon:'🔥',req:30,bonus:'+20% XP ورزش'},{name:'Titan',desc:'غول',icon:'👑',req:50,bonus:'x2 STR روزانه'}]},
+    int:{color:'#5b8dee',nodes:[{name:'Speed Reader',desc:'خواننده سریع',icon:'📖',req:5,bonus:'+5% XP مطالعه'},{name:'Analyst',desc:'تحلیلگر',icon:'🔍',req:15,bonus:'+10% XP مطالعه'},{name:'Philosopher',desc:'فیلسوف',icon:'💭',req:30,bonus:'+20% XP مطالعه'},{name:'Sage',desc:'حکیم',icon:'🌟',req:50,bonus:'x2 INT روزانه'}]},
+    wis:{color:'#9b6dff',nodes:[{name:'Mindful',desc:'ذهن‌آگاه',icon:'🧘',req:5,bonus:'+5% XP مدیتیشن'},{name:'Calm Heart',desc:'قلب آرام',icon:'☮️',req:15,bonus:'+10% XP مدیتیشن'},{name:'Oracle',desc:'پیشگو',icon:'🔮',req:30,bonus:'+20% XP مدیتیشن'},{name:'Enlightened',desc:'روشن‌شده',icon:'✨',req:50,bonus:'x2 WIS روزانه'}]},
+    com:{color:'#3dd9c5',nodes:[{name:'Listener',desc:'شنونده خوب',icon:'👂',req:5,bonus:'+5% XP زبان'},{name:'Speaker',desc:'سخنران',icon:'🎤',req:15,bonus:'+10% XP زبان'},{name:'Diplomat',desc:'دیپلمات',icon:'🤝',req:30,bonus:'+20% XP زبان'},{name:'Leader',desc:'رهبر',icon:'👑',req:50,bonus:'x2 COM روزانه'}]},
+    eng:{color:'#ff8c42',nodes:[{name:'Coder',desc:'برنامه‌نویس',icon:'💻',req:5,bonus:'+5% XP کدنویسی'},{name:'Architect',desc:'معمار',icon:'🏗️',req:15,bonus:'+10% XP کدنویسی'},{name:'Hacker',desc:'هکر',icon:'🔓',req:30,bonus:'+20% XP کدنویسی'},{name:'Tech God',desc:'خدای تکنولوژی',icon:'🤖',req:50,bonus:'x2 ENG روزانه'}]},
+    vit:{color:'#4caf7d',nodes:[{name:'Hydrated',desc:'آب‌نوش',icon:'💧',req:5,bonus:'+5% XP سلامت'},{name:'Well Rested',desc:'خواب منظم',icon:'😴',req:15,bonus:'+10 Max HP'},{name:'Athlete',desc:'ورزشکار',icon:'🏅',req:30,bonus:'+20 Max HP'},{name:'Immortal',desc:'جاودان',icon:'♾️',req:50,bonus:'+50 Max HP'}]},
+  },
+  ACHIEVEMENTS:[
+    {id:'first',name:'اولین قدم',desc:'اولین مأموریت',icon:'🌱',c:p=>Object.values(p.stats).some(v=>v>0)},
+    {id:'s3',name:'آتش!',desc:'۳ روز streak',icon:'🔥',c:p=>p.streak>=3},
+    {id:'s7',name:'یک هفته',desc:'۷ روز streak',icon:'🌟',c:p=>p.streak>=7},
+    {id:'s30',name:'یک ماه',desc:'۳۰ روز streak',icon:'💎',c:p=>p.streak>=30},
+    {id:'lv5',name:'قهرمان',desc:'Level 5',icon:'⚔️',c:p=>p.level>=5},
+    {id:'lv10',name:'افسانه',desc:'Level 10',icon:'👑',c:p=>p.level>=10},
+    {id:'lv20',name:'خدا',desc:'Level 20',icon:'🌌',c:p=>p.level>=20},
+    {id:'g100',name:'ثروتمند',desc:'100 Gold',icon:'🪙',c:p=>p.totalGold>=100},
+    {id:'g1000',name:'میلیونر',desc:'1000 Gold',icon:'💰',c:p=>p.totalGold>=1000},
+    {id:'b1',name:'قاتل باس',desc:'اولین باس',icon:'💀',c:p=>p.bossesKilled>=1},
+    {id:'b5',name:'شکارچی',desc:'5 باس',icon:'🏹',c:p=>p.bossesKilled>=5},
+    {id:'all',name:'کامل',desc:'همه مأموریت‌ها',icon:'✅',c:p=>p.allQuestsDay>=1},
+    {id:'shop5',name:'خریدار',desc:'5 آیتم',icon:'🛒',c:p=>p.ownedItems.length>=5},
+    {id:'str50',name:'غول',desc:'STR 50',icon:'💪',c:p=>p.stats.str>=50},
+    {id:'int50',name:'نابغه',desc:'INT 50',icon:'🧠',c:p=>p.stats.int>=50},
+  ],
+  STAT_INFO:{
+    str:{name:'Strength',color:'var(--red)',desc:'از طریق ورزش و فعالیت بدنی بالا میره.',tip:'۳۰ دقیقه ورزش = +2 STR'},
+    int:{name:'Intelligence',color:'var(--blue)',desc:'از طریق مطالعه و یادگیری افزایش پیدا می‌کنه.',tip:'۲۰ صفحه مطالعه = +2 INT'},
+    wis:{name:'Wisdom',color:'var(--purple)',desc:'از طریق مدیتیشن و تفکر عمیق تقویت میشه.',tip:'۲۰ دقیقه مدیتیشن = +2 WIS'},
+    com:{name:'Communication',color:'var(--cyan)',desc:'از طریق یادگیری زبان و ارتباط با دیگران.',tip:'۱۵ دقیقه زبان = +2 COM'},
+    eng:{name:'Engineering',color:'var(--orange)',desc:'از طریق کدنویسی و حل مسئله.',tip:'۱ ساعت کد = +2 ENG'},
+    vit:{name:'Vitality',color:'var(--green)',desc:'از طریق نوشیدن آب و مراقبت از سلامتی.',tip:'۸ لیوان آب = +2 VIT'},
+  },
+};
 
-<script src="js/data.js"></script>
-<script src="js/engine.js"></script>
-<script src="js/render.js"></script>
-<script src="js/particles.js"></script>
-<script src="js/app.js"></script>
+// ═══════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════
+const DEF = {
+  name:'Hero',cls:null,level:1,xp:0,gold:0,hp:100,maxHp:100,mana:50,maxMana:50,
+  streak:0,lastDate:null,
+  stats:{str:0,int:0,wis:0,com:0,eng:0,vit:0},
+  ownedItems:[],equippedItems:{weapon:null,armor:null,helmet:null,ring:null,necklace:null,boots:null},
+  activePet:null,
+  achievements:[],customQuests:[],
+  completedToday:[],completedWeekly:[],completedMonthly:[],
+  bossHp:500,bossMaxHp:500,bossIdx:0,bossesKilled:0,
+  challengeDate:null,challengeDone:false,
+  boosts:{},activityLog:[],
+  allQuestsDay:0,totalGold:0,totalXp:0,totalQuests:0,
+  skillPoints:0,
+};
+let P = JSON.parse(localStorage.getItem('qlv2')||'null');
+if(!P){P=JSON.parse(JSON.stringify(DEF))}
+else{for(const k in DEF)if(!(k in P))P[k]=JSON.parse(JSON.stringify(DEF[k]))}
+
+function save(){localStorage.setItem('qlv2',JSON.stringify(P))}
+function today(){return new Date().toDateString()}
+
+// ═══════════════════════════════════════
+// DAILY RESET
+// ═══════════════════════════════════════
+function checkReset(){
+  const t=today();
+  if(P.lastDate&&P.lastDate!==t){
+    const yd=new Date();yd.setDate(yd.getDate()-1);
+    P.streak=P.lastDate===yd.toDateString()?P.streak+1:0;
+    if(P.bossHp<=0){
+      const ni=Math.min(P.bossIdx+1,D.BOSSES.length-1);
+      if(ni>P.bossIdx){P.bossIdx=ni}
+      const b=D.BOSSES[P.bossIdx];P.bossHp=b.hp;P.bossMaxHp=b.hp;
+    }
+    P.activityLog.push(P.completedToday.length);
+    if(P.activityLog.length>30)P.activityLog.shift();
+    P.completedToday=[];P.challengeDate=null;P.challengeDone=false;
+  }
+  save();
+}
+
+// ═══════════════════════════════════════
+// QUEST COMPLETE
+// ═══════════════════════════════════════
+function completeQuest(id,type){
+  const key=id+'_'+type;
+  const arr=type==='weekly'?P.completedWeekly:type==='monthly'?P.completedMonthly:P.completedToday;
+  if(arr.includes(key)){showToast('قبلاً انجام دادی!','red');return}
+  
+  const allQ=[...D.DAILY_QUESTS,...D.WEEKLY_QUESTS,...D.MONTHLY_QUESTS,...(D.CLASS_QUESTS[P.cls]||[]),...P.customQuests];
+  const q=allQ.find(x=>x.id===id);
+  if(!q)return;
+  
+  let xp=q.xp,gold=q.gold;
+  const sm=P.streak>=30?1.5:P.streak>=7?1.2:P.streak>=3?1.1:1;
+  xp=Math.round(xp*sm);
+  if(P.cls&&D.CLASSES[P.cls]?.bonusStat===q.stat)xp=Math.round(xp*1.2);
+  
+  // item bonuses
+  P.ownedItems.forEach(iid=>{
+    const it=D.SHOP_ITEMS.find(x=>x.id===iid);if(!it)return;
+    if(it.stat===q.stat||it.stat==='all')xp=Math.round(xp*(1+it.bonusPct));
+    if(it.id==='wolf'||it.id==='pet_wolf')gold+=5;
+    if(it.id==='pet_fox')gold+=8;
+  });
+  // pet bonus
+  if(P.activePet){
+    const pet=D.PETS.find(x=>x.id===P.activePet);
+    if(pet){if(pet.stat==='xp_all')xp=Math.round(xp*(1+pet.val));if(pet.stat==='gold')gold+=pet.val;}
+  }
+  // boosts
+  const now=Date.now();
+  if(P.boosts.boost_xp&&P.boosts.boost_xp>now)xp*=2;
+  if(P.boosts.boost_gold&&P.boosts.boost_gold>now)gold*=2;
+  xp=Math.round(xp);gold=Math.round(gold);
+  
+  P.xp+=xp;P.gold+=gold;P.totalGold+=gold;P.totalXp+=xp;P.totalQuests++;
+  P.stats[q.stat]=(P.stats[q.stat]||0)+2;
+  arr.push(key);P.lastDate=today();
+  
+  // boss damage
+  if(P.bossHp>0){
+    P.bossHp-=xp;
+    if(P.bossHp<=0){
+      P.bossHp=0;const b=D.BOSSES[Math.min(P.bossIdx,D.BOSSES.length-1)];
+      P.gold+=b.reward.gold;P.xp+=b.reward.xp;P.bossesKilled++;
+      setTimeout(()=>showBossDefeated(b),700);
+    } else {
+      document.getElementById('bossCard').classList.remove('boss-shake');
+      void document.getElementById('bossCard').offsetWidth;
+      document.getElementById('bossCard').classList.add('boss-shake');
+    }
+  }
+  
+  // all quests check
+  const doneAll=D.DAILY_QUESTS.every(q=>P.completedToday.includes(q.id+'_daily'));
+  if(doneAll){P.allQuestsDay++;showToast('🏆 همه مأموریت‌ها!','gold');launchConfetti(50)}
+  
+  checkLevelUp();checkAch();save();renderAll();
+  showXpFloat('+'+xp+' XP');
+  showToast('✅ +'+xp+' XP  +'+gold+' 🪙','green');
+}
+
+function checkLevelUp(){
+  const need=D.XP_PER_LEVEL(P.level);
+  if(P.xp>=need){
+    P.xp-=need;P.level++;P.skillPoints++;
+    P.hp=Math.min(P.maxHp,P.hp+20);P.mana=Math.min(P.maxMana,P.mana+5);
+    if(P.level%3===0){
+      const ni=Math.min(P.bossIdx+1,D.BOSSES.length-1);
+      if(ni>P.bossIdx){P.bossIdx=ni;const b=D.BOSSES[P.bossIdx];P.bossHp=b.hp;P.bossMaxHp=b.hp;setTimeout(()=>showToast('👾 باس جدید: '+b.name+'!','red'),1200)}
+    }
+    if(P.level===10&&!P.cls)setTimeout(()=>openClassModal(),1000);
+    showLevelUp();checkLevelUp();
+  }
+}
+
+function checkAch(){
+  D.ACHIEVEMENTS.forEach(a=>{
+    if(!P.achievements.includes(a.id)&&a.c(P)){
+      P.achievements.push(a.id);
+      setTimeout(()=>{showToast('🏆 دستاورد: '+a.name,'gold');launchConfetti(25)},400);
+    }
+  });
+}
+
+function buyItem(id){
+  const it=D.SHOP_ITEMS.find(x=>x.id===id);if(!it)return;
+  if(P.ownedItems.includes(id)&&it.cat!=='boost'){showToast('قبلاً داری!','red');return}
+  if(P.gold<it.price){showToast('Gold کم داری! 💸','red');return}
+  P.gold-=it.price;
+  if(it.stat==='hp'){P.maxHp+=it.hp||10;P.hp=Math.min(P.hp+it.hp||10,P.maxHp)}
+  if(it.stat==='hp_potion'){P.hp=Math.min(P.hp+50,P.maxHp)}
+  if(it.stat==='mana_potion'){P.mana=Math.min(P.mana+50,P.maxMana)}
+  if(it.stat==='boost_xp'){P.boosts.boost_xp=Date.now()+86400000}
+  if(it.stat==='boost_gold'){P.boosts.boost_gold=Date.now()+86400000}
+  if(it.cat!=='boost')P.ownedItems.push(id);
+  checkAch();save();renderAll();
+  showToast('🎁 '+it.name+' خریداری شد!','gold');launchConfetti(20);
+}
+
+function equipItem(id){
+  const it=D.SHOP_ITEMS.find(x=>x.id===id);if(!it)return;
+  if(!P.ownedItems.includes(id)){showToast('اول بخر!','red');return}
+  const slot=it.equipped_slot;if(!slot)return;
+  P.equippedItems[slot]=P.equippedItems[slot]===id?null:id;
+  save();renderAll();
+  showToast(P.equippedItems[slot]?'✅ '+it.name+' تجهیز شد':'تجهیز برداشته شد','green');
+}
+
+function activatePet(id){
+  const pet=D.PETS.find(x=>x.id===id);if(!pet)return;
+  if(P.level<pet.reqLevel){showToast('Level '+pet.reqLevel+' نیاز داری!','red');return}
+  P.activePet=P.activePet===id?null:id;
+  save();renderAll();
+  showToast(P.activePet?'🐾 '+pet.name+' فعال شد':'پت غیرفعال شد','green');
+}
+
+function completeChallenge(){
+  if(P.challengeDone&&P.challengeDate===today()){showToast('امروز انجام دادی!','red');return}
+  const ch=D.DAILY_CHALLENGES[new Date().getDate()%D.DAILY_CHALLENGES.length];
+  P.xp+=ch.reward.xp;P.gold+=ch.reward.gold;P.totalGold+=ch.reward.gold;
+  P.challengeDate=today();P.challengeDone=true;
+  checkLevelUp();checkAch();save();renderAll();
+  showToast('🎯 +'+ch.reward.xp+' XP +'+ch.reward.gold+' 🪙','gold');launchConfetti(35);
+  document.getElementById('chBtn').disabled=true;document.getElementById('chBtn').textContent='✓ انجام شد';
+}
+
+function selectClass(cls){
+  P.cls=cls;save();closeModal('classModal');renderAll();
+  showToast('✅ کلاس '+D.CLASSES[cls].name+' انتخاب شد!','gold');launchConfetti(30);
+}
+
+function saveName(){
+  const v=document.getElementById('nameInput').value.trim();
+  if(!v){showToast('اسم خالیه!','red');return}
+  P.name=v;save();renderAll();showToast('✅ ذخیره شد','green');
+}
+
+function addCustomQuest(){
+  const title=document.getElementById('qTitle').value.trim();
+  const type=document.getElementById('qType').value;
+  const stat=document.getElementById('qStat').value;
+  const xp=parseInt(document.getElementById('qXp').value)||20;
+  const gold=parseInt(document.getElementById('qGold').value)||10;
+  if(!title){showToast('اسم خالیه!','red');return}
+  P.customQuests.push({id:'cust_'+Date.now(),title,xp,gold,stat,type});
+  save();closeModal('questModal');renderAll();showToast('✅ مأموریت اضافه شد!','green');
+  document.getElementById('qTitle').value='';
+}
+
+function confirmReset(){if(confirm('مطمئنی؟ همه داده‌ها پاک میشه!')){localStorage.removeItem('qlv2');location.reload()}}
+
+// ═══════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════
+let curQTab='daily',curShopTab='weapon',curInvTab='all',curTreeStat='str';
+
+function renderAll(){renderTopbar();renderDash();renderQuests();renderTree();renderMap();renderInventory();renderShop();renderPets();renderProfile()}
+
+function renderTopbar(){
+  document.getElementById('topLvl').textContent=P.level;
+  document.getElementById('topStreak').textContent='🔥 '+P.streak;
+  document.getElementById('topGold').textContent=P.gold;
+}
+
+function renderDash(){
+  const ci=P.cls?D.CLASSES[P.cls]:null;
+  // character
+  document.getElementById('avatarLv').textContent=P.level;
+  document.getElementById('pcName').textContent=P.name;
+  document.getElementById('pcTitle').textContent=getTitle(P.level);
+  document.getElementById('pcGold').textContent=P.gold;
+  // head face
+  const faces=['😐','🙂','😊','😎','🤩','😤','😈'];
+  document.getElementById('charHead').textContent=faces[Math.min(Math.floor(P.level/3),faces.length-1)];
+  // class badge
+  const cb=document.getElementById('pcClassBadge');
+  if(ci){cb.innerHTML=`<span class="pc-class-badge" style="color:${ci.color};border-color:${ci.color}" onclick="openClassModal()">${ci.icon} ${ci.name}</span>`}
+  else{cb.innerHTML=`<span class="pc-class-badge" style="color:var(--text3);border-color:var(--border)" onclick="openClassModal()">کلاس انتخاب کن ←</span>`}
+  // equipped weapon/armor on char
+  const we=P.equippedItems.weapon?D.SHOP_ITEMS.find(x=>x.id===P.equippedItems.weapon):null;
+  document.getElementById('charWeapon').textContent=we?we.icon:'';
+  // pet
+  const pet=P.activePet?D.PETS.find(x=>x.id===P.activePet):null;
+  document.getElementById('charPet').textContent=pet?pet.icon:'';
+  // aura based on level
+  const auraColors=['transparent','rgba(91,141,238,.4)','rgba(155,109,255,.4)','rgba(240,192,64,.4)','rgba(255,107,157,.6)'];
+  const auraIdx=Math.min(Math.floor(P.level/5),auraColors.length-1);
+  document.getElementById('charAura').style.borderColor=auraColors[auraIdx];
+
+  // bars
+  document.getElementById('hpBar').style.width=(P.hp/P.maxHp*100)+'%';
+  document.getElementById('hpTxt').textContent=P.hp+'/'+P.maxHp;
+  const need=D.XP_PER_LEVEL(P.level);
+  document.getElementById('xpBar').style.width=Math.min(100,P.xp/need*100)+'%';
+  document.getElementById('xpTxt').textContent=P.xp+'/'+need;
+  document.getElementById('manaBar').style.width=(P.mana/P.maxMana*100)+'%';
+  document.getElementById('manaTxt').textContent=P.mana+'/'+P.maxMana;
+
+  // stats
+  const maxS=Math.max(1,...Object.values(P.stats));
+  ['str','int','wis','com','eng','vit'].forEach(s=>{
+    document.getElementById('stat-'+s).textContent=P.stats[s]||0;
+    document.getElementById('bar-'+s).style.width=Math.round(((P.stats[s]||0)/Math.max(50,maxS))*100)+'%';
+  });
+  document.getElementById('totalPower').textContent='Power: '+Object.values(P.stats).reduce((a,b)=>a+b,0);
+
+  // boss
+  const boss=D.BOSSES[Math.min(P.bossIdx,D.BOSSES.length-1)];
+  document.getElementById('bossEm').textContent=boss.icon;
+  document.getElementById('bossName').textContent=boss.name;
+  document.getElementById('bossSub').textContent='باس #'+(P.bossIdx+1);
+  const pct=Math.max(0,P.bossHp/P.bossMaxHp*100);
+  document.getElementById('bossHpFill').style.width=pct+'%';
+  document.getElementById('bossHpTxt').textContent=Math.max(0,P.bossHp)+'/'+P.bossMaxHp;
+  const ring=document.getElementById('bossRing');
+  if(ring)ring.style.strokeDashoffset=163-(163*pct/100);
+  document.getElementById('bossDmg').textContent=P.bossHp<=0?'✅ باس کشته شد!':'هر مأموریت = ضربه 💥';
+
+  // challenge
+  const ch=D.DAILY_CHALLENGES[new Date().getDate()%D.DAILY_CHALLENGES.length];
+  const cdone=P.challengeDone&&P.challengeDate===today();
+  document.getElementById('chIcon').textContent=ch.icon;
+  document.getElementById('chName').textContent=ch.title;
+  document.getElementById('chRew').textContent='+'+ch.reward.xp+' XP  +'+ch.reward.gold+' 🪙';
+  const cb2=document.getElementById('chBtn');cb2.disabled=cdone;cb2.textContent=cdone?'✓ انجام شد':'انجام';
+
+  // achievements
+  document.getElementById('achCount').textContent=P.achievements.length+'/'+D.ACHIEVEMENTS.length;
+  document.getElementById('achScroll').innerHTML=D.ACHIEVEMENTS.map(a=>{
+    const u=P.achievements.includes(a.id)||a.c(P);
+    return`<div class="ach-item ${u?'unlocked':'locked'}"><div class="ach-em">${a.icon}</div><div class="ach-nm">${a.name}</div><div class="ach-dc">${a.desc}</div></div>`;
+  }).join('');
+
+  // profile avatar
+  document.getElementById('profileAv').textContent=ci?ci.avatar:'⚔️';
+}
+
+function renderQuests(){
+  const d=new Date();
+  const days=['یکشنبه','دوشنبه','سه‌شنبه','چهارشنبه','پنجشنبه','جمعه','شنبه'];
+  document.getElementById('qDate').textContent=days[d.getDay()]+' '+d.getDate();
+  document.getElementById('skillPoints').textContent='💎 '+P.skillPoints+' امتیاز';
+
+  // progress ring
+  const total=D.DAILY_QUESTS.length;
+  const done=D.DAILY_QUESTS.filter(q=>P.completedToday.includes(q.id+'_daily')).length;
+  const pct=total>0?Math.round(done/total*100):0;
+  const ring=document.getElementById('qRing');
+  if(ring)ring.style.strokeDashoffset=125.6-(125.6*pct/100);
+  document.getElementById('qRingTxt').textContent=pct+'%';
+
+  let quests=[];
+  if(curQTab==='daily')quests=D.DAILY_QUESTS;
+  else if(curQTab==='weekly')quests=D.WEEKLY_QUESTS;
+  else if(curQTab==='monthly')quests=D.MONTHLY_QUESTS;
+  else if(curQTab==='class')quests=D.CLASS_QUESTS[P.cls]||[];
+  else if(curQTab==='custom')quests=P.customQuests;
+
+  const arr=curQTab==='weekly'?P.completedWeekly:curQTab==='monthly'?P.completedMonthly:P.completedToday;
+
+  if(quests.length===0){
+    document.getElementById('questList').innerHTML=`<div style="color:var(--text3);font-size:12px;text-align:center;padding:20px">${curQTab==='class'&&!P.cls?'ابتدا کلاس انتخاب کن!':curQTab==='custom'?'مأموریت سفارشی اضافه نشده':'خالی'}</div>`;
+    return;
+  }
+
+  document.getElementById('questList').innerHTML=quests.map(q=>{
+    const key=q.id+'_'+curQTab;
+    const isDone=arr.includes(key);
+    const SL={str:'STR',int:'INT',wis:'WIS',com:'COM',eng:'ENG',vit:'VIT'};
+    return`<div class="quest-item ${isDone?'done':''}" onclick="completeQuest('${q.id}','${curQTab}');addRipple(event,this)">
+      <div class="qcheck">${isDone?'✓':''}</div>
+      <div class="qcontent">
+        <div class="qtitle">${q.title}</div>
+        <div class="qrews">
+          <span class="rtag rx">+${q.xp} XP</span>
+          <span class="rtag rg">+${q.gold} 🪙</span>
+          <span class="rtag rs">+${SL[q.stat]}</span>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderTree(){
+  const st=curTreeStat;const tree=D.SKILL_TREES[st];const val=P.stats[st]||0;
+  document.getElementById('treeWrap').innerHTML=tree.nodes.map((n,i)=>{
+    const u=val>=n.req;
+    const conn=i<tree.nodes.length-1?`<div class="tree-conn ${u?'active':''}"></div>`:'';
+    return`<div class="tree-node ${u?'unlocked':'locked'}">
+      <div class="tn-header">
+        <div class="tn-icon">${n.icon}</div>
+        <div class="tn-info"><div class="tn-name">${n.name}</div><div class="tn-desc">${n.desc} — ${n.bonus}</div></div>
+        <div class="tn-req">${u?'✓ باز':n.req+' '+st.toUpperCase()}</div>
+      </div>
+    </div>${conn}`;
+  }).join('');
+}
+
+function renderMap(){
+  const path=document.getElementById('mapPath');if(!path)return;
+  let curIdx=0;
+  D.WORLD_ZONES.forEach((z,i)=>{if(!z.req||(z.req.type==='level'&&P.level>=z.req.val))curIdx=i});
+  path.innerHTML=D.WORLD_ZONES.map((z,i)=>{
+    const u=!z.req||(z.req.type==='level'&&P.level>=z.req.val);
+    const isCur=i===curIdx;
+    const cls=isCur?'current':u?'unlocked':'locked';
+    const lineL=i>0?`<div class="zone-line ${D.WORLD_ZONES[i-1]&&(!D.WORLD_ZONES[i-1].req||P.level>=(D.WORLD_ZONES[i-1].req?.val||0))?'done':''}"></div>`:'';
+    const lineR=i<D.WORLD_ZONES.length-1?`<div class="zone-line ${u?'done':''}"></div>`:'';
+    const isEven=i%2===1;
+    return`<div class="zone-row">
+      ${isEven?lineR:lineL}
+      <div class="zone-dot-wrap">
+        <div class="zone-dot ${cls}">${z.icon}</div>
+        <div class="zone-lbl ${cls}">${z.name}</div>
+      </div>
+      ${isEven?lineL:lineR}
+      <div class="zone-side">
+        <div class="zone-sn" style="color:${isCur?'var(--cyan)':u?'var(--text)':'var(--text3)'}">${z.name}</div>
+        <div class="zone-sr">${u?'🔓 باز':'🔒 '+z.reqLabel}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderInventory(){
+  const items=P.ownedItems.map(id=>D.SHOP_ITEMS.find(x=>x.id===id)).filter(Boolean);
+  const filtered=curInvTab==='all'?items:items.filter(x=>x.cat===curInvTab);
+  document.getElementById('invCount').textContent=P.ownedItems.length+' آیتم';
+  document.getElementById('invGrid').innerHTML=filtered.length===0
+    ?`<div style="grid-column:span 3;color:var(--text3);font-size:12px;text-align:center;padding:20px">چیزی نداری!</div>`
+    :filtered.map(it=>{
+      const isEquipped=Object.values(P.equippedItems).includes(it.id);
+      return`<div class="inv-slot rarity-border ${it.rarity} ${isEquipped?'equipped':''}" onclick="openItemDetail('${it.id}')">
+        ${isEquipped?'<div class="inv-equipped-badge">✓</div>':''}
+        <div class="inv-slot-icon">${it.icon}</div>
+        <div class="inv-slot-name">${it.name}</div>
+        <div class="inv-slot-rarity ${it.rarity}">${it.rarity.toUpperCase()}</div>
+      </div>`;
+    }).join('');
+  
+  // equipped slots
+  const slots=[{key:'weapon',lbl:'⚔️'},{key:'armor',lbl:'🛡️'},{key:'helmet',lbl:'⛑️'},{key:'ring',lbl:'💍'},{key:'necklace',lbl:'📿'},{key:'boots',lbl:'👢'}];
+  document.getElementById('equippedSlots').innerHTML=slots.map(s=>{
+    const eid=P.equippedItems[s.key];const it=eid?D.SHOP_ITEMS.find(x=>x.id===eid):null;
+    return`<div class="inv-slot ${eid?'':'empty'}" style="min-height:60px" onclick="${eid?`openItemDetail('${eid}')`:''}" title="${s.key}">
+      <div class="inv-slot-icon" style="font-size:20px">${it?it.icon:s.lbl}</div>
+      ${it?`<div class="inv-slot-name">${it.name}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderShop(){
+  document.getElementById('shopGold').textContent=P.gold;
+  const items=D.SHOP_ITEMS.filter(x=>x.cat===curShopTab);
+  document.getElementById('shopGrid').innerHTML=items.map(it=>{
+    const owned=P.ownedItems.includes(it.id)&&it.cat!=='boost';
+    const cant=P.gold<it.price&&!owned;
+    const RCLR={common:'var(--common)',rare:'var(--rare)',epic:'var(--epic)',legendary:'var(--gold)',mythic:'var(--pink)'};
+    return`<div class="shop-item ${owned?'owned':''} ${cant?'cant':''}" onclick="buyItem('${it.id}')">
+      ${owned?'<div class="shop-owned">✓ دارم</div>':''}
+      <div class="shop-rarity-line ${it.rarity}"></div>
+      <div class="shop-icon">${it.icon}</div>
+      <div class="shop-name">${it.name}</div>
+      <div class="shop-bonus" style="color:${RCLR[it.rarity]||'var(--cyan)'}">${it.bonus}</div>
+      <div class="shop-price">${owned?'✓ خریده شده':'🪙 '+it.price}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderPets(){
+  const activePet=P.activePet?D.PETS.find(x=>x.id===P.activePet):null;
+  document.getElementById('activePetLabel').textContent=activePet?activePet.icon+' '+activePet.name+' فعاله':'بدون پت';
+  document.getElementById('petsGrid').innerHTML=D.PETS.map(pet=>{
+    const locked=P.level<pet.reqLevel;
+    const isActive=P.activePet===pet.id;
+    return`<div class="pet-card ${isActive?'active-pet':''} ${locked?'locked-pet':''}" onclick="activatePet('${pet.id}')">
+      ${isActive?'<div class="pet-active-badge">فعال ✓</div>':''}
+      <span class="pet-icon">${pet.icon}</span>
+      <div class="pet-name">${pet.name}</div>
+      <div class="pet-bonus">${pet.bonus}</div>
+      <div class="pet-req">${locked?'🔒 Level '+pet.reqLevel:'🔓 باز شده'}</div>
+    </div>`;
+  }).join('');
+}
+
+function renderProfile(){
+  const ci=P.cls?D.CLASSES[P.cls]:null;
+  document.getElementById('nameInput').value=P.name;
+  document.getElementById('profileClass').textContent=ci?ci.icon+' '+ci.name:'بدون کلاس';
+  document.getElementById('profileTitle').textContent=getTitle(P.level);
+  document.getElementById('statsFullGrid').innerHTML=[
+    {v:P.level,l:'Level',c:'var(--gold)'},{v:P.xp,l:'XP',c:'var(--blue)'},{v:P.gold,l:'🪙 Gold',c:'var(--gold)'},
+    {v:P.streak,l:'🔥 Streak',c:'var(--orange)'},{v:P.totalQuests,l:'مأموریت',c:'var(--green)'},{v:P.achievements.length,l:'دستاورد',c:'var(--purple)'},
+    {v:P.bossesKilled,l:'باس کشته',c:'var(--red)'},{v:P.ownedItems.length,l:'آیتم',c:'var(--cyan)'},{v:P.skillPoints,l:'💎 امتیاز',c:'var(--gold)'},
+  ].map(s=>`<div class="sf-card"><div class="sf-val" style="color:${s.c}">${s.v}</div><div class="sf-lbl">${s.l}</div></div>`).join('');
+  const log=[...P.activityLog].slice(-14);
+  const mx=Math.max(1,...log);
+  document.getElementById('actChart').innerHTML=log.map(v=>`<div class="act-bar ${v>0?'has-data':''}" style="height:${Math.max(4,Math.round(v/mx*52))}px"></div>`).join('');
+}
+
+// CLASS MODAL
+function renderClassModal(){
+  const branches={};
+  Object.entries(D.CLASSES).forEach(([id,c])=>{
+    if(!branches[c.branch])branches[c.branch]=[];
+    branches[c.branch].push({id,...c});
+  });
+  document.getElementById('classGrid').innerHTML=Object.entries(branches).map(([branch,classes])=>`
+    <div class="class-branch">
+      <div class="branch-title">${branch}</div>
+      <div class="class-opts-row">
+        ${classes.map(c=>`<div class="class-opt" onclick="selectClass('${c.id}')">
+          <div class="class-opt-glow" style="background:radial-gradient(circle at 50% 0%,${c.color}20,transparent)"></div>
+          <div class="class-opt-icon">${c.icon}</div>
+          <div class="class-opt-name" style="color:${c.color}">${c.name}</div>
+          <div class="class-opt-bonus">+20% ${c.bonusLabel}</div>
+        </div>`).join('')}
+      </div>
+    </div>`).join('');
+}
+
+// MODALS
+function openModal(id){document.getElementById(id).classList.add('open')}
+function closeModal(id){document.getElementById(id).classList.remove('open')}
+function openClassModal(){renderClassModal();openModal('classModal')}
+function openQuestModal(){openModal('questModal')}
+
+function showStatModal(stat){
+  const info=D.STAT_INFO[stat];const val=P.stats[stat]||0;
+  document.getElementById('statModalContent').innerHTML=`
+    <div style="text-align:center;padding:6px 0 14px">
+      <div style="font-size:38px;margin-bottom:6px">${D.SKILL_TREES[stat].nodes[0].icon}</div>
+      <div style="font-family:'Cinzel',serif;font-size:16px;color:${info.color};margin-bottom:3px">${info.name}</div>
+      <div style="font-size:30px;font-weight:800;color:${info.color}">${val}</div>
+    </div>
+    <div style="font-size:12px;color:var(--text2);margin-bottom:10px;line-height:1.7">${info.desc}</div>
+    <div style="background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:10px;font-size:11px;color:var(--text3)">💡 ${info.tip}</div>
+    <button class="btn-cancel" onclick="closeModal('statModal')" style="width:100%;margin-top:12px">بستن</button>`;
+  openModal('statModal');
+}
+
+function openItemDetail(id){
+  const it=D.SHOP_ITEMS.find(x=>x.id===id);if(!it)return;
+  const RC={common:'var(--common)',rare:'var(--rare)',epic:'var(--epic)',legendary:'var(--gold)',mythic:'var(--pink)'};
+  const isEquipped=Object.values(P.equippedItems).includes(id);
+  document.getElementById('itemModalContent').innerHTML=`
+    <div class="item-detail">
+      <div class="item-detail-icon">${it.icon}</div>
+      <div class="item-detail-name">${it.name}</div>
+      <div class="item-detail-rarity" style="color:${RC[it.rarity]}">${it.rarity.toUpperCase()}</div>
+      <div class="item-detail-stats">
+        <div class="ids-row"><span class="ids-lbl">بونوس</span><span class="ids-val" style="color:var(--cyan)">${it.bonus}</span></div>
+        <div class="ids-row"><span class="ids-lbl">قیمت</span><span class="ids-val" style="color:var(--gold)">🪙 ${it.price}</span></div>
+        <div class="ids-row"><span class="ids-lbl">دسته</span><span class="ids-val">${it.cat}</span></div>
+        ${it.atk?`<div class="ids-row"><span class="ids-lbl">ATK</span><span class="ids-val" style="color:var(--red)">+${it.atk}</span></div>`:''}
+        ${it.hp?`<div class="ids-row"><span class="ids-lbl">HP</span><span class="ids-val" style="color:var(--green)">+${it.hp}</span></div>`:''}
+      </div>
+      ${it.equipped_slot?`<button class="btn-primary" onclick="equipItem('${id}');closeModal('itemModal')" style="width:100%;margin-bottom:8px">${isEquipped?'تجهیز برداشتن ✕':'تجهیز کردن ✓'}</button>`:''}
+      <button class="btn-cancel" onclick="closeModal('itemModal')" style="width:100%">بستن</button>
+    </div>`;
+  openModal('itemModal');
+}
+
+function showLevelUp(){
+  document.getElementById('luNum').textContent=P.level;
+  document.getElementById('luSub').textContent=getTitle(P.level)+' شدی!';
+  document.getElementById('luRewards').innerHTML=`<div class="lu-rew-badge">+1 💎 Skill Point</div><div class="lu-rew-badge">+20 ❤️ HP</div>`;
+  openModal('luModal');launchConfetti(60);
+}
+
+function showBossDefeated(boss){
+  document.getElementById('bdIcon').textContent=boss.icon;
+  document.getElementById('bdName').textContent=boss.name+' شکست خورد!';
+  document.getElementById('bdReward').textContent='+'+boss.reward.gold+' 🪙  +'+boss.reward.xp+' XP';
+  openModal('bdModal');launchConfetti(60);
+}
+
+// TABS
+function switchQTab(tab,btn){curQTab=tab;document.querySelectorAll('.qtab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderQuests()}
+function switchShopTab(tab,btn){curShopTab=tab;document.querySelectorAll('.shop-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderShop()}
+function switchInvTab(tab,btn){curInvTab=tab;document.querySelectorAll('.inv-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderInventory()}
+function switchTree(stat,btn){curTreeStat=stat;document.querySelectorAll('.tree-tab').forEach(t=>t.classList.remove('active'));btn.classList.add('active');renderTree()}
+
+function goPage(id,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.getElementById('page-'+id).classList.add('active');
+  btn.classList.add('active');
+  if(id==='shop')renderShop();
+  if(id==='profile')renderProfile();
+  if(id==='map')renderMap();
+  if(id==='skilltree')renderTree();
+  if(id==='inventory')renderInventory();
+  if(id==='pets')renderPets();
+}
+
+// HELPERS
+function getTitle(l){const t=D.TITLES.find(x=>l>=x.min&&l<=x.max);return t?t.t:'قهرمان'}
+
+function showToast(msg,type='green'){
+  const c=document.getElementById('toastC');
+  const el=document.createElement('div');
+  el.className='toast '+type;el.textContent=msg;
+  c.appendChild(el);setTimeout(()=>el.remove(),2700);
+}
+
+function showXpFloat(text){
+  const c=document.getElementById('xpFC');
+  const el=document.createElement('div');
+  el.className='xp-f';el.textContent=text;
+  el.style.left=(25+Math.random()*50)+'%';el.style.top='40%';
+  c.appendChild(el);setTimeout(()=>el.remove(),1400);
+}
+
+function launchConfetti(n=30){
+  const cols=['#f0c040','#ff8c42','#9b6dff','#5b8dee','#4caf7d','#e85d5d','#ff6b9d','#3dd9c5'];
+  for(let i=0;i<n;i++){
+    const el=document.createElement('div');
+    el.className='confetti-p';
+    const sz=5+Math.random()*8;
+    el.style.cssText=`left:${10+Math.random()*80}%;top:${10+Math.random()*40}%;width:${sz}px;height:${sz}px;background:${cols[Math.floor(Math.random()*cols.length)]};--d:${1+Math.random()*.8}s;--ty:${140+Math.random()*120}px;--tx:${-60+Math.random()*120}px;--r:${360+Math.random()*360}deg;animation-delay:${Math.random()*.25}s;border-radius:${Math.random()>.5?'50%':'2px'}`;
+    document.body.appendChild(el);setTimeout(()=>el.remove(),2200);
+  }
+}
+
+function addRipple(e,el){
+  const r=document.createElement('span');const rect=el.getBoundingClientRect();
+  const sz=Math.max(rect.width,rect.height);
+  r.className='ripple';r.style.width=r.style.height=sz+'px';
+  r.style.left=(e.clientX-rect.left-sz/2)+'px';r.style.top=(e.clientY-rect.top-sz/2)+'px';
+  el.appendChild(r);setTimeout(()=>r.remove(),700);
+}
+
+// CHALLENGE TIMER
+function startTimer(){
+  const el=document.getElementById('chTimer');
+  function tick(){
+    const now=new Date();const end=new Date();end.setHours(23,59,59,999);
+    const d=end-now;
+    const h=String(Math.floor(d/3600000)).padStart(2,'0');
+    const m=String(Math.floor(d%3600000/60000)).padStart(2,'0');
+    const s=String(Math.floor(d%60000/1000)).padStart(2,'0');
+    el.textContent='⏰ '+h+':'+m+':'+s;
+  }
+  tick();setInterval(tick,1000);
+}
+
+// BOSS SHAKE
+const bossShakeStyle=document.createElement('style');
+bossShakeStyle.textContent='.boss-shake{animation:bshake .4s ease}.@keyframes bshake{0%,100%{transform:translateX(0)}20%{transform:translateX(-6px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(4px)}}';
+document.head.appendChild(bossShakeStyle);
+
+// PARTICLES
+(function(){
+  const cv=document.getElementById('bgCanvas');if(!cv)return;
+  const ctx=cv.getContext('2d');
+  let W,H,pts=[];
+  function resize(){W=cv.width=window.innerWidth;H=cv.height=window.innerHeight}
+  resize();window.addEventListener('resize',resize);
+  const COLS=['rgba(240,192,64,','rgba(91,141,238,','rgba(155,109,255,','rgba(61,217,197,'];
+  class Pt{constructor(){this.reset()}reset(){this.x=Math.random()*W;this.y=Math.random()*H;this.vx=(Math.random()-.5)*.2;this.vy=-Math.random()*.3-.08;this.r=Math.random()*1.4+.2;this.col=COLS[Math.floor(Math.random()*COLS.length)];this.a=Math.random()*.3+.04;this.life=0;this.ml=200+Math.random()*500}update(){this.x+=this.vx;this.y+=this.vy;this.life++;if(this.life>this.ml||this.y<-10||this.x<-10||this.x>W+10){this.reset();this.y=H+5}}draw(){const f=this.life<40?this.life/40:this.life>this.ml-40?(this.ml-this.life)/40:1;ctx.beginPath();ctx.arc(this.x,this.y,this.r,0,Math.PI*2);ctx.fillStyle=this.col+(this.a*f)+')';ctx.fill()}}
+  for(let i=0;i<70;i++){const p=new Pt();p.life=Math.random()*p.ml;pts.push(p)}
+  function loop(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.update();p.draw()});requestAnimationFrame(loop)}
+  loop();
+})();
+
+// close modals
+document.querySelectorAll('.modal-overlay').forEach(el=>{
+  el.addEventListener('click',function(e){
+    if(e.target===this){const safe=['luModal','bdModal'];if(!safe.includes(this.id))closeModal(this.id)}
+  });
+});
+
+// INIT
+checkReset();renderAll();startTimer();
+
+// PWA hint
+if(!window.matchMedia('(display-mode: standalone)').matches){
+  setTimeout(()=>showToast('💡 Safari → Share → Add to Home Screen','purple'),3000);
+}
+</script>
 </body>
 </html>
+HTMLEOF
+echo "Done! $(wc -c < /mnt/user-data/outputs/questlife-v2.html) bytes"
